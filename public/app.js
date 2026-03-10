@@ -5,7 +5,7 @@ let wordPlaceholders = [];
 let templateId = null;
 let mappings = {};
 
-const API_BASE = 'http://localhost:3000/api';
+const API_BASE = '/api';
 
 // ===== UTILIDADES =====
 function showStep(stepNumber) {
