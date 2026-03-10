@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Generador automático de documentos Word desde datos de Excel. Mapea placeholders y genera documentos en lote. Descarga en ZIP (DOCX y PDF).">
+    <meta name="keywords" content="generador documentos, Excel a Word, automatización documentos, mapeo word excel, descarga ZIP documentos">
+    <meta name="author" content="DocuMapper">
+
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="Mapeo de Datos Excel a Word automático">
+    <meta property="og:description" content="Mapea datos de Excel y genera documentos Word automáticamente. Descarga en ZIP.">
+    <meta property="og:url" content="https://doc-generator.onrender.com">
+
+    <!-- Structured Data-->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "WebApplication",
+        "name": "Generador de Documentos",
+        "description": "Mapea datos de Excel y genera documentos Word automáticamente",
+        "url": "https://doc-generator.onrender.com",
+        "applicationCategory": "BusinessApplication",
+        "offers": {
+            "@type": "Offer",
+            "price": "0",
+            "priceCurrency": "COP"
+        }
+    }
+    </script>
+
+    <title>DocuMapper App</title>
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <link rel="canonical" href="https://doc-generator.onrender.com">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
+    <link rel="icon" type="image/jpg" href="assets/images/LOGO.png" />
+</head>
+
+<body class="d-flex flex-column min-vh-100">
+    <div class="container-fluid flex-grow-1 py-2">
+        <header class="text-white text-center mb-2">
+            <div class="row align-items-center justify-content-center">
+                <div class="col-md-8">
+                    <h1 class="display-4 mb-2"> <strong>DocuMapper</strong> </h1>
+                    <p class="lead">Mapea datos de Excel y genera documentos Word automáticamente</p>
+                    <img src="assets/images/LOGO.png" alt="logo DocuMapper" class="img-fluid" style="max-width: 85px;">
+                </div>
+            </div>
+        </header>
+
+        <div class="content">
+            <!-- Paso 1: Cargar Excel -->
+            <section class="step card mb-4" id="step1">
+                <div class="card-header bg-white border-bottom">
+                    <div class="row align-items-center">
+                        <div class="col-auto">
+                            <span class="badge bg-dark p-3 fs-5">1</span>
+                        </div>
+                        <div class="col">
+                            <h2 class="h5 mb-0">Carga tu archivo Excel</h2>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <p class="p-2 text-success-emphasis bg-success-subtle border border-success-subtle rounded-3"><strong>Nota:</strong> La primera fila de la hoja de cálculo debe contener los encabezados de las columnas (ej.: Nombre, Empresa, etc.).</p>
+                    <div class="upload-area border-2 border-dashed rounded p-5 text-center" id="excelDropArea">
+                        <div class="mb-3">
+                            <img src="assets/images/excellogo.png" alt="" style="width: 40px;">
+                        </div>
+                        <p class="text-muted"><i class="bi bi-cloud-arrow-up"></i> Arrastra o Selecciona tu archivo aqui</p>
+                        <input type="file" id="excelInput" accept=".xlsx,.xls" hidden>
+                    </div>
+                    <div id="excelStatus" class="mt-3"></div>
+                </div>
+            </section>
+
+            <!-- Paso 2: Cargar Plantilla Word -->
+            <section class="step card mb-4" id="step2" style="display: none;">
+                <div class="card-header bg-white border-bottom">
+                    <div class="row align-items-center">
+                        <div class="col-auto">
+                            <span class="badge bg-dark p-3 fs-5">2</span>
+                        </div>
+                        <div class="col">
+                            <h2 class="h5 mb-0">Carga tu plantilla Word</h2>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <p class="p-2 text-primary-emphasis bg-primary-subtle border border-primary-subtle rounded-3"><strong>Nota:</strong> La plantilla debe contener placeholders en formato {TEXTO} (ej: {Nombre}, {Empresa})</p>
+                    <div class="upload-area border-2 border-dashed rounded p-5 text-center" id="wordDropArea">
+                        <div class="mb-3">
+                            <img src="assets/images/wordlogo.png" alt="" style="width: 40px;">
+                        </div>
+                        <p class="text-muted"><i class="bi bi-cloud-arrow-up"></i> Arrastra tu plantilla Word aquí o haz click para seleccionar</p>
+                        <input type="file" id="wordInput" accept=".docx" hidden>
+                    </div>
+                    <div id="wordStatus" class="mt-3"></div>
+                </div>
+            </section>
+
+            <!-- Paso 3: Mapeo -->
+            <section class="step card mb-1" id="step3" style="display: none;">
+                <div class="card-header bg-white border-bottom">
+                    <div class="row align-items-center">
+                        <div class="col-auto">
+                            <span class="badge bg-dark p-3 fs-5">3</span>
+                        </div>
+                        <div class="col">
+                            <h2 class="h5 mb-0"><i class="bi bi-arrow-left-right"></i> Mapea columnas con placeholders</h2>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div id="mappingContainer" class="mb-0"></div>
+                    <button class="btn btn-outline-secondary" onclick="showPreview()"><i class="bi bi-eye"></i> Vista Previa</button>
+                </div>
+            </section>
+
+            <!-- Paso 4: Generar Documentos -->
+            <section class="step card mb-4" id="step4" style="display: none;">
+                <div class="card-header bg-white border-bottom">
+                    <div class="row align-items-center">
+                        <div class="col-auto">
+                            <span class="badge bg-dark p-3 fs-5">4</span>
+                        </div>
+                        <div class="col">
+                            <h2 class="h5 mb-0">Genera tus documentos</h2>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-success mb-3">
+                        <p class="mb-0"><strong>Archivos a generar:</strong> <span id="filesToGenerate">0</span></p>
+                        <p class="mb-0"><strong>Placeholders mapeados:</strong> <span id="placeholdersMapped">0</span> de <span id="placeholdersTotal">0</span></p>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Mes para el nombre del archivo:</label>
+                        <select id="monthSelect" class="form-select">
+                            <option value="ENE">ENE - Enero</option>
+                            <option value="FEB">FEB - Febrero</option>
+                            <option value="MAR">MAR - Marzo</option>
+                            <option value="ABR">ABR - Abril</option>
+                            <option value="MAY">MAY - Mayo</option>
+                            <option value="JUN">JUN - Junio</option>
+                            <option value="JUL">JUL - Julio</option>
+                            <option value="AGO">AGO - Agosto</option>
+                            <option value="SEP">SEP - Septiembre</option>
+                            <option value="OCT">OCT - Octubre</option>
+                            <option value="NOV">NOV - Noviembre</option>
+                            <option value="DIC">DIC - Diciembre</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Columna para nombre del archivo:</label>
+                        <p class="text-muted small mb-2 ">Formato: <code>INFORME_SUP_{MES}_{valor de la columna}.docx</code></p>
+                        <select id="filenameColumnSelect" class="form-select">
+                            <option value="">-- Selecciona la columna del contratista --</option>
+                        </select>
+                    </div>
+                    <button class="btn btn-success btn-lg w-50 mb-4 mx-auto d-block" onclick="generateAllDocuments()">
+                        <i class="bi bi-stars"></i> GENERAR
+                    </button>
+                    <div id="generationProgress" style="display: none;">
+                        <div class="progress mb-3" style="height: 8px;">
+                            <div id="progressFill" class="progress-bar bg-primary" style="width: 0%"></div>
+                        </div>
+                        <p id="progressText">Generando documentos...</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Resultados -->
+            <section class="step card mb-4" id="step5" style="display: none;">
+                <div class="card-header bg-white border-bottom">
+                    <div class="row align-items-center">
+                        <div class="col-auto">
+                            <span class="badge bg-success rounded-circle p-3 fs-5"><i class="bi bi-check-circle-fill"></i></span>
+                        </div>
+                        <div class="col">
+                            <h2 class="h5 mb-0">Documentos generados</h2>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-success mb-4">
+                        Se generaron <span id="successCount">0</span> documentos exitosamente
+                    </div>
+                    <div id="downloadList" class="row g-3 mb-4 text-light "></div>
+
+                    <!-- Descarga en lote -->
+                    <div class="alert alert-success mb-4">
+                        <h5 class="alert-heading mb-3"><i class="bi bi-box-arrow-down"></i> Descargar en lote</h5>
+                        <div class="d-grid gap-2 d-md-flex gap-md-2">
+                            <button class="btn btn-primary flex-grow-1" onclick="downloadAllDocx()">
+                               (DOCX)
+                            </button>
+                            <button class="btn btn-danger flex-grow-1" onclick="downloadAllPdf()">
+                               (PDF)
+                            </button>
+                        </div>
+                    </div>
+
+                    <button class="btn btn-warning w-30 mx-auto d-block" onclick="resetForm()"><i class="bi bi-arrow-repeat px-2 "></i>Inicio</button>
+                </div>
+            </section>
+        </div>
+    </div>
+
+    <!-- Modal para vista previa -->
+    <div id="previewModal" class="modal fade" style="display: none;" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Vista Previa</h5>
+                    <button type="button" class="btn-close" onclick="closePreview()" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div id="previewData"></div>
+                    <div id="previewLoading" style="display: none;">Generando vista previa...</div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" onclick="closePreview()"><i class="bi bi-x-lg"></i> Cerrar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="text-center py-1 mt-auto">
+        <p class="mb-0">Desarrollado con ❤️ por Ing. David Tejada Vargas. <br> Todos los derechos reservados.<br>© 2026 DocuMapper.</p>
+    </footer>
+
+    <!-- Bootstrap 5 JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="app.js"></script>
+</body>
+
+</html>
