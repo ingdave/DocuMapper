@@ -1,16 +1,12 @@
-# 📚 Cómo Explicar Doc Generator a tu Público
-
-## 🎯 Resumen Ejecutivo (2 minutos)
-
-**Doc Generator** es una herramienta que **automatiza la generación de documentos Word personalizados** usando datos de Excel.
+**DocuMapper** es una herramienta que **automatiza la generación de documentos Word personalizados** usando datos de Excel.
 
 **El problema que resuelve:**
 - Antes: Crear 100 documentos Word = 2-3 horas de trabajo manual
-- Ahora: Crear 100 documentos Word = 30 segundos ✨
+- Ahora: Crear 100 documentos Word = 30 segundos aproximadamente
 
 ---
 
-## 🏗️ ARQUITECTURA (Para entender cómo funciona)
+## ARQUITECTURA
 
 ```
 ┌─────────────────────────────────────────────────────────┐
@@ -41,11 +37,9 @@
 └─────────────────────────────────────────────────────────┘
 ```
 
----
+##  FLUJO DE DATOS
 
-## 📊 FLUJO DE DATOS (Cómo se procesa la información)
-
-### **Paso 1: Usuario carga un Excel**
+### **1. Usuario carga un Excel**
 ```
 usuario.xlsx
      ↓
@@ -60,7 +54,7 @@ Responde JSON: { headers: [...], data: [...] }
 Muestra en Paso 2 ✓
 ```
 
-### **Paso 2: Usuario carga una Plantilla Word**
+### **2. Usuario carga una Plantilla Word**
 ```
 plantilla.docx
      ↓
@@ -75,7 +69,7 @@ Responde JSON: { placeholders: [...], templateId: "uuid" }
 Muestra en Paso 3 ✓
 ```
 
-### **Paso 3: Usuario mapea columnas ↔ Placeholders**
+### **3: Usuario mapea columnas ↔ Placeholders**
 ```
 Excel Columns        →    Word Placeholders
 ─────────────────        ──────────────────
@@ -88,7 +82,7 @@ Guarda el mapeo en variable: mappings = { nombre: "nombre", ... }
 Muestra en Paso 4 ✓
 ```
 
-### **Paso 4: Generación de Documentos (El CORE)**
+### **4: Generación de Documentos (El CORE)**
 ```
 Para CADA fila del Excel:
   → Tomar valores: { nombre: "Juan", empresa: "XYZ", fecha: "17/12/25" }
@@ -104,7 +98,7 @@ Resultado: documento_Juan_1.docx, documento_Maria_2.docx, ...
 Muestra en Paso 5 ✓
 ```
 
-### **Paso 5: Descarga en ZIP**
+### **5: Descarga en ZIP**
 ```
 Todos los documentos → archiver.zip() → documentos.zip
      ↓
@@ -113,7 +107,7 @@ Usuario descarga un solo archivo en lugar de 100
 
 ---
 
-## 🔧 COMPONENTES TÉCNICOS (Para técnicos)
+## COMPONENTES TÉCNICOS
 
 ### **Frontend (Cliente)**
 ```
@@ -212,7 +206,7 @@ Rutas:
 
 ---
 
-## 💾 FLUJO DE ARCHIVOS
+## FLUJO DE ARCHIVOS
 
 ```
 Usuario
@@ -230,7 +224,7 @@ Ciclo de vida:
 
 ---
 
-## 🔄 TECNOLOGÍAS INVOLUCRADAS
+## TECNOLOGÍAS INVOLUCRADAS
 
 ### **Bibliotecas clave:**
 
@@ -246,43 +240,39 @@ Ciclo de vida:
 
 ---
 
-## 🎯 CONCEPTOS CLAVE PARA EXPLICAR
+## CONCEPTOS CLAVE PARA EXPLICAR
 
-### **Para no-técnicos:**
 1. **Template:** Es la plantilla Word con "espacios en blanco" ({{nombre}})
 2. **Placeholder:** El "espacio en blanco" que será reemplazado
 3. **Mapeo:** Decirle al programa "la columna 'nombre' del Excel va aquí"
 4. **Lote:** Procesar muchos documentos a la vez
-
-### **Para técnicos:**
-1. **XML manipulation:** Word es un ZIP que contiene XML
-2. **Regex replacement:** Búsqueda y reemplazo con patrones
-3. **Streaming:** Los ZIPs se generan en tiempo real (no en RAM)
-4. **Async operations:** Manejo de uploads/downloads sin bloqueos
+5. **XML manipulation:** Word es un ZIP que contiene XML
+6. **Regex replacement:** Búsqueda y reemplazo con patrones
+7. **Streaming:** Los ZIPs se generan en tiempo real (no en RAM)
+8. **Async operations:** Manejo de uploads/downloads sin bloqueos
 
 ---
+##  VENTAJAS ARQUITECTÓNICAS
 
-## 📈 VENTAJAS ARQUITECTÓNICAS
-
-✅ **Separación de responsabilidades**
+**Separación de responsabilidades**
 - Cada controlador hace UNA cosa
 - Fácil de mantener y debuggear
 
-✅ **Stateless (sin estado)**
+**Stateless (sin estado)**
 - Cada request es independiente
 - Escalable horizontalmente
 
-✅ **Procesamiento robusto**
+**Procesamiento robusto**
 - Fallback si docxtemplater falla
 - Limpieza automática de temporales
 
-✅ **Frontend-Backend desacoplado**
+**Frontend-Backend desacoplado**
 - Fácil cambiar UI sin tocar servidor
 - Fácil cambiar API sin tocar frontend
 
 ---
 
-## 🚀 CÓMO PRESENTARLO
+## DocuMapper
 
 ### **Para clientes:**
 > "Carga tu Excel con datos, tu plantilla Word con placeholders, 
@@ -300,7 +290,7 @@ Ciclo de vida:
 
 ---
 
-## 📋 PREGUNTAS TÍPICAS A ANTICIPAR
+## Preguntas frecuentes!
 
 **P: "¿Qué ocurre si tengo 10,000 filas?"**
 R: Tomará ~1-2 minutos. El servidor procesa una por una sin problema.
@@ -316,19 +306,3 @@ R: Los archivos temporales se limpian. Usuario debe reintentar.
 
 **P: "¿Puedo agregar más procesamiento?"**
 R: Sí, es fácil. La arquitectura modular permite extensiones.
-
----
-
-## 🎓 RESUMEN VISUAL
-
-```
-ENTRADA                PROCESO                   SALIDA
-────────────────────────────────────────────────────────
-Excel + Word    →   Mapeo + Validación   →   ZIP con docs
-  ↓ Datos             ↓ Lógica                   ↓ Resultado
-  ↓ Template          ↓ Reemplazo          ↓ Descargable
-```
-
----
-
-**¡Con esto ya puedes explicar Doc Generator a cualquiera!**
