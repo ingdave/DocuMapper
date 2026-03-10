@@ -43,7 +43,6 @@ app.post('/api/word/extract-variables', upload.single('file'), wordController.ex
 app.post('/api/mapping/generate', mappingController.generateDocuments);
 app.post('/api/mapping/preview', mappingController.previewDocument);
 app.post('/api/mapping/download-all-docx', mappingController.downloadAllDocx);
-app.post('/api/mapping/download-all-pdf', mappingController.downloadAllPdf);
 
 // Ruta de descarga
 app.get('/api/download/:filename', (req, res) => {

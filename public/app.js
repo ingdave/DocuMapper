@@ -356,6 +356,8 @@ async function generateAllDocuments() {
             return;
         }
 
+        const initialName = document.getElementById('initialNameInput').value.trim() || 'Informe_supervision';
+
         // Enviar petición al servidor para generar todos los documentos
         const generationResponse = await fetch(`${API_BASE}/mapping/generate`, {
             method: 'POST',
@@ -367,7 +369,8 @@ async function generateAllDocuments() {
                 mappings,
                 excelData,
                 filenameColumn: document.getElementById('filenameColumnSelect').value,
-                month: document.getElementById('monthSelect').value
+                month: document.getElementById('monthSelect').value,
+                initialName: initialName
             })
         });
 
@@ -390,14 +393,14 @@ async function generateAllDocuments() {
                 result.files.forEach((file, index) => {
                     if (file.filename) {
                         const col = document.createElement('div');
-                        col.className = 'col-12 col-lg-4';
+                        col.className = 'col-4';
 
                         const item = document.createElement('div');
-                        item.className = 'download-item p-3 h-100';
+                        item.className = 'download-item h-100';
                         item.innerHTML = `
-                            <div class="d-flex flex-column gap-2">
-                                <small class="text-muted text-truncate">${file.filename}</small>
-                                <a href="${file.downloadUrl}" download class="btn btn-sm btn-success text-white">
+                            <div class="d-flex flex-column gap-1 w-100 text-center">
+                                <small class="text-muted text-truncate w-100 d-block mb-1">${file.filename}</small>
+                                <a href="${file.downloadUrl}" download class="btn btn-sm btn-success text-white w-100 mt-2">
                                     <i class="bi bi-download"></i> Descargar
                                 </a>
                             </div>
@@ -476,43 +479,6 @@ async function downloadAllDocx() {
     }
 }
 
-async function downloadAllPdf() {
-    if (generatedFilenames.length === 0) {
-        showError('No hay documentos generados para descargar');
-        return;
-    }
-
-    const button = event.target;
-    button.disabled = true;
-    button.textContent = 'Preparando ZIP...';
-
-    try {
-        const response = await fetch(`${API_BASE}/mapping/download-all-pdf`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ filenames: generatedFilenames })
-        });
-
-        if (!response.ok) {
-            const error = await response.json();
-            throw new Error(error.error || 'Error creating ZIP');
-        }
-
-        const result = await response.json();
-
-        if (result.downloadUrl) {
-            const link = document.createElement('a');
-            link.href = result.downloadUrl;
-            link.click();
-            showStatus('downloadList', `✓ ZIP de ${generatedFilenames.length} documentos (PDF) descargado`, true);
-        }
-    } catch (error) {
-        showError(error.message);
-    } finally {
-        button.disabled = false;
-        button.textContent = 'Descargar TODO en ZIP (PDF)';
-    }
-}
 
 // Inicializar
 showStep(1);

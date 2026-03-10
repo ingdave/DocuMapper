@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Generador automático de documentos Word desde datos de Excel. Mapea placeholders y genera documentos en lote. Descarga en ZIP (DOCX y PDF).">
+    <meta name="description" content="Generador automático de documentos Word desde datos de Excel. Mapea placeholders y genera documentos en lote. Descarga en ZIP (DOCX).">
     <meta name="keywords" content="generador documentos, Excel a Word, automatización documentos, mapeo word excel, descarga ZIP documentos">
     <meta name="author" content="DocuMapper">
 
@@ -42,11 +42,12 @@
 <body class="d-flex flex-column min-vh-100">
     <div class="container-fluid flex-grow-1 py-2">
         <header class="text-white text-center mb-2">
+            <div class="bg-light" style="padding: 1px;"></div>
             <div class="row align-items-center justify-content-center">
                 <div class="col-md-8">
                     <h1 class="display-4 mb-2"> <strong>DocuMapper</strong> </h1>
                     <p class="lead">Mapea datos de Excel y genera documentos Word automáticamente</p>
-                    <img src="assets/images/LOGO.png" alt="logo DocuMapper" class="img-fluid" style="max-width: 85px;">
+                    <img src="assets/images/LOGO.png" alt="logo DocuMapper" class="img-fluid pb-2" style="max-width: 85px;">
                 </div>
             </div>
         </header>
@@ -70,7 +71,7 @@
                         <div class="mb-3">
                             <img src="assets/images/excellogo.png" alt="" style="width: 40px;">
                         </div>
-                        <p class="text-muted"><i class="bi bi-cloud-arrow-up"></i> Arrastra o Selecciona tu archivo aqui</p>
+                        <p class="text-muted">Arrastra o Selecciona tu archivo aqui</p>
                         <input type="file" id="excelInput" accept=".xlsx,.xls" hidden>
                     </div>
                     <div id="excelStatus" class="mt-3"></div>
@@ -95,7 +96,7 @@
                         <div class="mb-3">
                             <img src="assets/images/wordlogo.png" alt="" style="width: 40px;">
                         </div>
-                        <p class="text-muted"><i class="bi bi-cloud-arrow-up"></i> Arrastra tu plantilla Word aquí o haz click para seleccionar</p>
+                        <p class="text-muted">Arrastra tu plantilla Word aquí o haz click para seleccionar</p>
                         <input type="file" id="wordInput" accept=".docx" hidden>
                     </div>
                     <div id="wordStatus" class="mt-3"></div>
@@ -110,7 +111,7 @@
                             <span class="badge bg-dark p-3 fs-5">3</span>
                         </div>
                         <div class="col">
-                            <h2 class="h5 mb-0"><i class="bi bi-arrow-left-right"></i> Mapea columnas con placeholders</h2>
+                            <h2 class="h5 mb-0"> Mapea columnas con placeholders</h2>
                         </div>
                     </div>
                 </div>
@@ -128,7 +129,7 @@
                             <span class="badge bg-dark p-3 fs-5">4</span>
                         </div>
                         <div class="col">
-                            <h2 class="h5 mb-0">Genera tus documentos</h2>
+                            <h2 class="h5 mb-0">Genera tus documentos de acuerdo al formato</h2>
                         </div>
                     </div>
                 </div>
@@ -137,26 +138,29 @@
                         <p class="mb-0"><strong>Archivos a generar:</strong> <span id="filesToGenerate">0</span></p>
                         <p class="mb-0"><strong>Placeholders mapeados:</strong> <span id="placeholdersMapped">0</span> de <span id="placeholdersTotal">0</span></p>
                     </div>
+                    <p class="text-muted small mb-2 ">Formato para personalizar: <code> prefijo_mes_diferenciador.docx</code><br></p>
                     <div class="mb-3">
-                        <label class="form-label fw-bold">Mes para el nombre del archivo:</label>
+                        <label class="form-label fw-bold">Selecciona el prefijo:</label>
+                        <input type="text" id="initialNameInput" class="form-control" placeholder="Ej: Informe_supervision" value="Informe_supervision">
+                    </div>
+                    <div class="mb-3 fw-bold"">Selecciona el mes:</label>
                         <select id="monthSelect" class="form-select">
-                            <option value="ENE">ENE - Enero</option>
-                            <option value="FEB">FEB - Febrero</option>
-                            <option value="MAR">MAR - Marzo</option>
-                            <option value="ABR">ABR - Abril</option>
-                            <option value="MAY">MAY - Mayo</option>
-                            <option value="JUN">JUN - Junio</option>
-                            <option value="JUL">JUL - Julio</option>
-                            <option value="AGO">AGO - Agosto</option>
-                            <option value="SEP">SEP - Septiembre</option>
-                            <option value="OCT">OCT - Octubre</option>
-                            <option value="NOV">NOV - Noviembre</option>
-                            <option value="DIC">DIC - Diciembre</option>
+                            <option value="ENE">ENE</option>
+                            <option value="FEB">FEB</option>
+                            <option value="MAR">MAR</option>
+                            <option value="ABR">ABR</option>
+                            <option value="MAY">MAY</option>
+                            <option value="JUN">JUN</option>
+                            <option value="JUL">JUL</option>
+                            <option value="AGO">AGO</option>
+                            <option value="SEP">SEP</option>
+                            <option value="OCT">OCT</option>
+                            <option value="NOV">NOV</option>
+                            <option value="DIC">DIC</option>
                         </select>
                     </div>
                     <div class="mb-3">
-                        <label class="form-label fw-bold">Columna para nombre del archivo:</label>
-                        <p class="text-muted small mb-2 ">Formato: <code>INFORME_SUP_{MES}_{valor de la columna}.docx</code></p>
+                        <label class="form-label fw-bold">Selecciona el diferenciador:</label>
                         <select id="filenameColumnSelect" class="form-select">
                             <option value="">-- Selecciona la columna del contratista --</option>
                         </select>
@@ -186,25 +190,21 @@
                     </div>
                 </div>
                 <div class="card-body">
-                    <div class="alert alert-success mb-4">
+                    <div class="alert alert-success mb-2">
                         Se generaron <span id="successCount">0</span> documentos exitosamente
                     </div>
-                    <div id="downloadList" class="row g-3 mb-4 text-light "></div>
+                    <div id="downloadList" class="row g-1 mb-2 text-light"></div>
 
                     <!-- Descarga en lote -->
-                    <div class="alert alert-success mb-4">
-                        <h5 class="alert-heading mb-3"><i class="bi bi-box-arrow-down"></i> Descargar en lote</h5>
-                        <div class="d-grid gap-2 d-md-flex gap-md-2">
-                            <button class="btn btn-primary flex-grow-1" onclick="downloadAllDocx()">
-                               (DOCX)
-                            </button>
-                            <button class="btn btn-danger flex-grow-1" onclick="downloadAllPdf()">
-                               (PDF)
+                    <div class="alert alert-success mb-2">
+                        <h5 class="alert-heading mb-2"><i class="bi bi-box-arrow-down"></i> Descargar en lote</h5>
+                        <div class="d-grid gap-1">
+                            <button class="btn btn-primary w-100" onclick="downloadAllDocx()">
+                                (DOCX)
                             </button>
                         </div>
                     </div>
-
-                    <button class="btn btn-warning w-30 mx-auto d-block" onclick="resetForm()"><i class="bi bi-arrow-repeat px-2 "></i>Inicio</button>
+                    <button class="btn btn-warning w-100 mt-2" onclick="resetForm()"><i class="bi bi-arrow-repeat me-1"></i><strong>INICIO</strong></button>
                 </div>
             </section>
         </div>
@@ -228,9 +228,22 @@
             </div>
         </div>
     </div>
-
-    <footer class="text-center py-1 mt-auto">
-        <p class="mb-0">Desarrollado con ❤️ por Ing. David Tejada Vargas. <br> Todos los derechos reservados.<br>© 2026 DocuMapper.</p>
+    <footer class="container text-center py-2 mt-auto bg-light border-top rounded-top-4">
+        <div class="container">
+            <p class="mb-1 text-muted">
+                Desarrollado por <strong>Ing. David Tejada</strong>
+                <br>
+                © 2026 <strong>DocuMapper</strong> - Todos los derechos reservados.
+            </p>
+            <div class="d-flex justify-content-center gap-3">
+                <a href="https://github.com/ingdave" target="_blank" class="text-decoration-none fw-semibold" style="color: #181717;">
+                    <i class="bi bi-github"></i> GitHub
+                </a>
+                <a href="https://www.linkedin.com/in/datejad/" target="_blank" class="text-decoration-none fw-semibold" style="color: #0A66C2;">
+                    <i class="bi bi-linkedin"></i> LinkedIn
+                </a>
+            </div>
+        </div>
     </footer>
 
     <!-- Bootstrap 5 JS -->

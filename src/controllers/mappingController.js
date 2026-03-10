@@ -10,19 +10,7 @@ import { wordController } from './wordController.js';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const downloadsDir = path.join(__dirname, '../../downloads');
 
-// Importar docx-pdf (CommonJS)
-const require = createRequire(import.meta.url);
-const docxPdf = require('docx-pdf');
 
-// Promisificar docx-pdf
-function convertDocxToPdf(inputPath, outputPath) {
-  return new Promise((resolve, reject) => {
-    docxPdf(inputPath, outputPath, (err, result) => {
-      if (err) reject(err);
-      else resolve(result);
-    });
-  });
-}
 
 // Función para convertir valores a strings
 function stringifyValue(value) {
@@ -57,8 +45,9 @@ function getCurrentMonthSpanish() {
   return MESES_ES[new Date().getMonth()];
 }
 
-function buildFilename(row, filenameColumn, index, month) {
+function buildFilename(row, filenameColumn, index, month, initialName) {
   const mes = month || getCurrentMonthSpanish();
+  const prefix = initialName ? initialName.trim() : 'Informe_supervision';
   let contratista = '';
   
   if (filenameColumn && row[filenameColumn]) {
@@ -74,7 +63,7 @@ function buildFilename(row, filenameColumn, index, month) {
     .replace(/[^a-zA-Z0-9áéíóúÁÉÍÓÚñÑ_]/g, '')
     .substring(0, 50);
   
-  return `INFORME_SUP_${mes}_${sanitized}.docx`;
+  return `${prefix}_${mes}_${sanitized}.docx`;
 }
 
 export const mappingController = {
@@ -150,7 +139,7 @@ export const mappingController = {
 
   generateDocuments: async (req, res) => {
     try {
-      const { templateId, mappings, excelData, filenameColumn, month } = req.body;
+      const { templateId, mappings, excelData, filenameColumn, month, initialName } = req.body;
 
       if (!templateId || !mappings || !excelData) {
         return res.status(400).json({ error: 'Campos obligatorios faltantes' });
@@ -189,8 +178,8 @@ export const mappingController = {
             doc.render();
             buffer = doc.getZip().generate({ type: 'nodebuffer' });
             
-            // Nombre con formato INFORME_SUP_MES_contratista
-            filename = buildFilename(row, filenameColumn, i + 1);
+            // Nombre con formato PREFIJO_MES_contratista
+            filename = buildFilename(row, filenameColumn, i + 1, month, initialName);
             filepath = path.join(downloadsDir, filename);
             
             fs.writeFileSync(filepath, buffer);
@@ -242,7 +231,7 @@ export const mappingController = {
               
               console.log(`Fila ${i + 1} resumen: ${Object.keys(replacementsDone).length}/${Object.keys(mappedData).length} placeholders reemplazados`);
               
-              filename = buildFilename(row, filenameColumn, i + 1, month);
+              filename = buildFilename(row, filenameColumn, i + 1, month, initialName);
               filepath = path.join(downloadsDir, filename);
               
               fs.writeFileSync(filepath, buffer);
@@ -292,8 +281,7 @@ export const mappingController = {
           index: f.index
         })),
         allFilenames: validFiles,
-        downloadZipDocxUrl: validFiles.length > 0 ? '/api/mapping/download-all-docx' : null,
-        downloadZipPdfUrl: validFiles.length > 0 ? '/api/mapping/download-all-pdf' : null
+        downloadZipDocxUrl: validFiles.length > 0 ? '/api/mapping/download-all-docx' : null
       });
 
     } catch (error) {
@@ -353,89 +341,6 @@ export const mappingController = {
 
     } catch (error) {
       console.error('Error de descarga:', error);
-      res.status(500).json({ error: error.message });
-    }
-  },
-
-  downloadAllPdf: async (req, res) => {
-    try {
-      const { filenames } = req.body;
-
-      if (!filenames || !Array.isArray(filenames) || filenames.length === 0) {
-        return res.status(400).json({ error: 'No se especificaron archivos' });
-      }
-
-      // Validar que todos los archivos existan y sean .docx
-      const validFiles = filenames.filter(f => {
-        const filepath = path.join(downloadsDir, f);
-        return fs.existsSync(filepath) && f.endsWith('.docx');
-      });
-
-      if (validFiles.length === 0) {
-        return res.status(400).json({ error: 'No se encontraron archivos .docx válidos' });
-      }
-
-      console.log(`Convirtiendo ${validFiles.length} archivos DOCX a PDF...`);
-
-      // Convertir cada DOCX a PDF
-      const pdfFiles = [];
-      for (const filename of validFiles) {
-        const docxPath = path.join(downloadsDir, filename);
-        const pdfFilename = filename.replace('.docx', '.pdf');
-        const pdfPath = path.join(downloadsDir, pdfFilename);
-
-        try {
-          await convertDocxToPdf(docxPath, pdfPath);
-          pdfFiles.push({ pdfFilename, pdfPath });
-          console.log(`✓ Convertido: ${filename} → ${pdfFilename}`);
-        } catch (convErr) {
-          console.error(`✗ Error convirtiendo ${filename}:`, convErr.message);
-        }
-      }
-
-      if (pdfFiles.length === 0) {
-        return res.status(500).json({ error: 'No se pudo convertir ningún archivo a PDF' });
-      }
-
-      // Crear ZIP con los PDFs reales
-      const zipFilename = `documentos_pdf_${Date.now()}.zip`;
-      const zipPath = path.join(downloadsDir, zipFilename);
-
-      const output = fs.createWriteStream(zipPath);
-      const archive = archiver('zip', { zlib: { level: 9 } });
-
-      output.on('close', () => {
-        console.log(`✓ ZIP PDF creado: ${zipFilename} (${archive.pointer()} bytes)`);
-
-        // Limpiar PDFs temporales
-        pdfFiles.forEach(({ pdfPath }) => {
-          try { fs.unlinkSync(pdfPath); } catch (e) { /* ignore */ }
-        });
-
-        res.json({
-          success: true,
-          downloadUrl: `/api/download/${zipFilename}`,
-          message: `${pdfFiles.length} documentos convertidos a PDF`,
-          zipSize: archive.pointer()
-        });
-      });
-
-      archive.on('error', (err) => {
-        console.error('Error del archivo:', err);
-        res.status(500).json({ error: 'Error creando ZIP: ' + err.message });
-      });
-
-      archive.pipe(output);
-
-      // Agregar PDFs reales al ZIP
-      pdfFiles.forEach(({ pdfFilename, pdfPath }) => {
-        archive.file(pdfPath, { name: pdfFilename });
-      });
-
-      archive.finalize();
-
-    } catch (error) {
-      console.error('Error de descarga PDF:', error);
       res.status(500).json({ error: error.message });
     }
   }
