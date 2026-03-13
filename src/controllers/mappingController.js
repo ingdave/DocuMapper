@@ -6,6 +6,11 @@ import { createRequire } from 'module';
 import { fileURLToPath } from 'url';
 import archiver from 'archiver';
 import { wordController } from './wordController.js';
+import { exec } from 'child_process';
+import { promisify } from 'util';
+import ConvertApi from 'convertapi';
+
+const execAsync = promisify(exec);
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const downloadsDir = path.join(__dirname, '../../downloads');
@@ -68,74 +73,6 @@ function buildFilename(row, filenameColumn, index, month, initialName) {
 
 export const mappingController = {
 
-  previewDocument: async (req, res) => {
-    try {
-      const { templateId, mappings, sampleData } = req.body;
-
-      if (!templateId || !mappings || !sampleData) {
-        return res.status(400).json({ error: 'Campos obligatorios faltantes' });
-      }
-
-      const templatePath = wordController.getStoredTemplate(templateId);
-      if (!templatePath || !fs.existsSync(templatePath)) {
-        return res.status(400).json({ error: 'Plantilla no encontrada o expirada' });
-      }
-
-      // Mapear datos de muestra con el mapeo
-      const mappedData = {};
-      for (const [placeholder, excelColumn] of Object.entries(mappings)) {
-        mappedData[placeholder] = stringifyValue(sampleData[excelColumn]);
-      }
-
-      // Generar documento de previsualizacion
-      try {
-        const content = fs.readFileSync(templatePath);
-        const zip = new PizZip(content);
-        
-        try {
-          const doc = new Docxtemplater(zip, { linebreaks: true });
-          doc.setData(mappedData);
-          doc.render();
-          const buffer = doc.getZip().generate({ type: 'nodebuffer' });
-          const filename = `preview_${Date.now()}.docx`;
-          const filepath = path.join(downloadsDir, filename);
-          fs.writeFileSync(filepath, buffer);
-
-          res.json({
-            success: true,
-            downloadUrl: `/api/download/${filename}`,
-            message: 'Vista previa generada exitosamente'
-          });
-        } catch (docError) {
-          console.error('Error de Docxtemplater:', {
-            message: docError.message,
-            id: docError.properties?.id,
-            context: docError.properties?.context,
-            file: docError.properties?.file
-          });
-          
-          // Fallback: simplemente copiar el archivo sin procesar
-          console.warn('Docxtemplater falló, devolviendo plantilla sin procesar');
-          const filename = `preview_${Date.now()}.docx`;
-          const filepath = path.join(downloadsDir, filename);
-          fs.copyFileSync(templatePath, filepath);
-          
-          res.json({
-            success: true,
-            downloadUrl: `/api/download/${filename}`,
-            message: 'Plantilla copiada (no se pudieron llenar los placeholders)'
-          });
-        }
-      } catch (error) {
-        console.error('Error procesando vista previa:', error);
-        res.status(400).json({ error: error.message });
-      }
-
-    } catch (error) {
-      console.error('Error generando vista previa:', error);
-      res.status(500).json({ error: error.message });
-    }
-  },
 
   generateDocuments: async (req, res) => {
     try {
@@ -173,7 +110,12 @@ export const mappingController = {
           let filepath;
           
           try {
-            const doc = new Docxtemplater(zip, { linebreaks: true });
+            const doc = new Docxtemplater(zip, { 
+              linebreaks: true,
+              nullGetter() {
+                return "";
+              }
+            });
             doc.setData(mappedData);
             doc.render();
             buffer = doc.getZip().generate({ type: 'nodebuffer' });
@@ -203,11 +145,11 @@ export const mappingController = {
                 // Crear regex flexible que permite espacios y saltos de línea
                 const patterns = [
                   // Exactos
-                  new RegExp(`\\{\\{\\s*${placeholder.trim()}\\s*\\}\\}`, 'gi'),
+                  new RegExp(`\\{\\s*${placeholder.trim()}\\s*\\}`, 'gi'),
                   // Con espacios variables
-                  new RegExp(`\\{\\{\\s*${placeholder.trim().replace(/\s+/g, '\\s+')}\\s*\\}\\}`, 'gi'),
+                  new RegExp(`\\{\\s*${placeholder.trim().replace(/\s+/g, '\\s+')}\\s*\\}`, 'gi'),
                   // Compatibilidad: sin espacios
-                  new RegExp(`\\{\\{${placeholder.trim()}\\}\\}`, 'gi')
+                  new RegExp(`\\{${placeholder.trim()}\\}`, 'gi')
                 ];
                 
                 for (const regex of patterns) {
@@ -224,6 +166,13 @@ export const mappingController = {
                 if (!foundMatch) {
                   console.warn(`No se pudo encontrar {{${placeholder}}} en el XML`);
                 }
+              }
+              
+              // Limpieza final: eliminar cualquier placeholder {VARIABLE} que haya quedado sin mapear
+              const beforeCleanup = xmlContent;
+              xmlContent = xmlContent.replace(/\{\s*[a-zA-Z0-9_áéíóúñ\s]+?\s*\}/g, "");
+              if (xmlContent !== beforeCleanup) {
+                console.log("✓ Limpieza final: Se eliminaron placeholders huérfanos del XML");
               }
               
               zip.file('word/document.xml', xmlContent);
@@ -341,6 +290,104 @@ export const mappingController = {
 
     } catch (error) {
       console.error('Error de descarga:', error);
+      res.status(500).json({ error: error.message });
+    }
+  },
+
+  downloadAllPdf: async (req, res) => {
+    try {
+      const { filenames } = req.body;
+
+      if (!filenames || !Array.isArray(filenames) || filenames.length === 0) {
+        return res.status(400).json({ error: 'No se especificaron archivos' });
+      }
+
+      // Validar archivos DOCX existentes
+      const validDocx = filenames.filter(f => {
+        const filepath = path.join(downloadsDir, f);
+        return fs.existsSync(filepath) && f.endsWith('.docx');
+      });
+
+      if (validDocx.length === 0) {
+        return res.status(400).json({ error: 'No se encontraron archivos DOCX para convertir' });
+      }
+
+      const pdfFiles = [];
+      const secret = process.env.CONVERT_API_SECRET || 'YOUR_SECRET_HERE';
+      const convertapi = ConvertApi(secret);
+      
+      console.log(`Iniciando conversión a PDF para ${validDocx.length} archivos:`, validDocx);
+      
+      // Convertir cada archivo DOCX a PDF usando ConvertAPI
+      for (const docx of validDocx) {
+        const inputPath = path.join(downloadsDir, docx);
+        const pdfFilename = docx.replace('.docx', '.pdf');
+        const outputPath = path.join(downloadsDir, pdfFilename);
+
+        try {
+          console.log(`Enviando a ConvertAPI: ${docx}...`);
+          
+          if (secret === 'YOUR_SECRET_HERE' || !secret) {
+             throw new Error('API Secret de ConvertAPI no configurado.');
+          }
+
+          const result = await convertapi.convert('pdf', { File: inputPath }, 'docx');
+          console.log(`✓ Recibido de ConvertAPI: ${docx}. Guardando en ${downloadsDir}`);
+          
+          // Guardar archivos
+          const files = await result.saveFiles(downloadsDir);
+          console.log(`Archivos guardados para ${docx}:`, files);
+          
+          if (fs.existsSync(outputPath)) {
+            pdfFiles.push(pdfFilename);
+            console.log(`✓ Validado: ${pdfFilename} existe.`);
+          } else {
+            console.warn(`⚠ Advertencia: El archivo ${outputPath} no existe después de saveFiles.`);
+            // Intentar buscar si se guardó con otro nombre
+            const savedFile = files[0];
+            if (savedFile && fs.existsSync(savedFile)) {
+               const actualName = path.basename(savedFile);
+               if (actualName !== pdfFilename) {
+                 console.log(`Cambiando nombre de ${actualName} a ${pdfFilename}`);
+                 fs.renameSync(savedFile, outputPath);
+                 pdfFiles.push(pdfFilename);
+               }
+            }
+          }
+        } catch (convErr) {
+          console.error(`✘ Error convirtiendo ${docx}:`, convErr.message);
+        }
+      }
+
+      if (pdfFiles.length === 0) {
+        return res.status(500).json({ 
+          error: 'No se pudo convertir ningún archivo a PDF. Verifica tu conexión o el Secret Key de ConvertAPI.' 
+        });
+      }
+
+      const zipFilename = `documentos_pdf_${Date.now()}.zip`;
+      const zipPath = path.join(downloadsDir, zipFilename);
+
+      const output = fs.createWriteStream(zipPath);
+      const archive = archiver('zip', { zlib: { level: 9 } });
+
+      output.on('close', () => {
+        console.log(`✓ ZIP PDF (Nube) creado: ${zipFilename}`);
+        res.json({
+          success: true,
+          downloadUrl: `/api/download/${zipFilename}`,
+          message: `${pdfFiles.length} PDF documents packaged via Cloud`
+        });
+      });
+
+      archive.pipe(output);
+      pdfFiles.forEach(f => {
+        archive.file(path.join(downloadsDir, f), { name: f });
+      });
+      archive.finalize();
+
+    } catch (error) {
+      console.error('Error generando PDF:', error);
       res.status(500).json({ error: error.message });
     }
   }

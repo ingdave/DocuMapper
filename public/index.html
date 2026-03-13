@@ -41,11 +41,15 @@
 
 <body class="d-flex flex-column min-vh-100">
     <div class="container-fluid flex-grow-1 py-2">
-        <header class="text-white text-center mb-2">
-            <div class="bg-light" style="padding: 1px;"></div>
+        <header class="text-white text-center mb-2 position-relative">
             <div class="row align-items-center justify-content-center">
                 <div class="col-md-8">
-                    <h1 class="display-4 mb-2"> <strong>DocuMapper</strong> </h1>
+                    <h1 class="display-4 mb-2"> 
+                        <strong>DocuMapper</strong> 
+                        <button class="btn btn-outline-light ms-2 border-0" data-bs-toggle="modal" data-bs-target="#helpModal" title="Manual de Usuario" style="vertical-align: middle;">
+                            <i class="bi bi-info-lg"></i>
+                        </button>
+                    </h1>
                     <p class="lead">Mapea datos de Excel y genera documentos Word automáticamente</p>
                     <img src="assets/images/LOGO.png" alt="logo DocuMapper" class="img-fluid pb-2" style="max-width: 85px;">
                 </div>
@@ -138,25 +142,26 @@
                         <p class="mb-0"><strong>Archivos a generar:</strong> <span id="filesToGenerate">0</span></p>
                         <p class="mb-0"><strong>Placeholders mapeados:</strong> <span id="placeholdersMapped">0</span> de <span id="placeholdersTotal">0</span></p>
                     </div>
-                    <p class="text-muted small mb-2 ">Formato para personalizar: <code> prefijo_mes_diferenciador.docx</code><br></p>
+                    <p class="text-muted small mb-2 ">Formato para personalizar: <code> {PREFIJO}_{Mes}_{DIFERENCIADOR}.docx</code><br></p>
                     <div class="mb-3">
                         <label class="form-label fw-bold">Selecciona el prefijo:</label>
                         <input type="text" id="initialNameInput" class="form-control" placeholder="Ej: Informe_supervision" value="Informe_supervision">
                     </div>
-                    <div class="mb-3 fw-bold"">Selecciona el mes:</label>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Selecciona el mes:</label>
                         <select id="monthSelect" class="form-select">
-                            <option value="ENE">ENE</option>
-                            <option value="FEB">FEB</option>
-                            <option value="MAR">MAR</option>
-                            <option value="ABR">ABR</option>
-                            <option value="MAY">MAY</option>
-                            <option value="JUN">JUN</option>
-                            <option value="JUL">JUL</option>
-                            <option value="AGO">AGO</option>
-                            <option value="SEP">SEP</option>
-                            <option value="OCT">OCT</option>
-                            <option value="NOV">NOV</option>
-                            <option value="DIC">DIC</option>
+                        <option value="ENE">ENE</option>
+                        <option value="FEB">FEB</option>
+                        <option value="MAR">MAR</option>
+                        <option value="ABR">ABR</option>
+                        <option value="MAY">MAY</option>
+                        <option value="JUN">JUN</option>
+                        <option value="JUL">JUL</option>
+                        <option value="AGO">AGO</option>
+                        <option value="SEP">SEP</option>
+                        <option value="OCT">OCT</option>
+                        <option value="NOV">NOV</option>
+                        <option value="DIC">DIC</option>
                         </select>
                     </div>
                     <div class="mb-3">
@@ -198,9 +203,12 @@
                     <!-- Descarga en lote -->
                     <div class="alert alert-success mb-2">
                         <h5 class="alert-heading mb-2"><i class="bi bi-box-arrow-down"></i> Descargar en lote</h5>
-                        <div class="d-grid gap-1">
+                        <div class="d-grid gap-2">
                             <button class="btn btn-primary w-100" onclick="downloadAllDocx()">
-                                (DOCX)
+                                <i class="bi bi-file-earmark-word"></i> Descargar en lote (DOCX)
+                            </button>
+                            <button class="btn btn-danger w-100" onclick="downloadAllPdf()">
+                                <i class="bi bi-file-earmark-pdf"></i> Descargar en lote (PDF)
                             </button>
                         </div>
                     </div>
@@ -228,21 +236,136 @@
             </div>
         </div>
     </div>
-    <footer class="container text-center py-2 mt-auto bg-light border-top rounded-top-4">
-        <div class="container">
-            <p class="mb-1 text-muted">
-                Desarrollado por <strong>Ing. David Tejada</strong>
-                <br>
-                © 2026 <strong>DocuMapper</strong> - Todos los derechos reservados.
-            </p>
-            <div class="d-flex justify-content-center gap-3">
-                <a href="https://github.com/ingdave" target="_blank" class="text-decoration-none fw-semibold" style="color: #181717;">
-                    <i class="bi bi-github"></i> GitHub
-                </a>
-                <a href="https://www.linkedin.com/in/datejad/" target="_blank" class="text-decoration-none fw-semibold" style="color: #0A66C2;">
-                    <i class="bi bi-linkedin"></i> LinkedIn
-                </a>
+    <div class="modal fade" id="helpModal" tabindex="-1" aria-labelledby="helpModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header bg-success text-white">
+                    <h5 class="modal-title" id="helpModalLabel">
+                        <i class="bi bi-info-lg"></i>Guía Completa de Usuario - DocuMapper
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body text-dark">
+                    <!-- Introducción -->
+                    <section class="mb-4">
+                        <h6 class="fw-bold text-success">¿Qué hace esta herramienta?</h6>
+                        <p>DocuMapper permite tomar una lista de datos en Excel y "rellenar" automáticamente una plantilla de Word para generar decenas o cientos de documentos personalizados en segundos. Ideal para cuentas de cobro, contratos, informes o cartas masivas.</p>
+                    </section>
+
+                    <hr>
+
+                    <!-- Preparación -->
+                    <section class="mb-4">
+                        <h6 class="fw-bold"><i class="bi bi-1-square-fill"></i> Preparación de Archivos</h6>
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <div class="card h-100 bg-light border-0">
+                                    <div class="card-body">
+                                        <h7 class="fw-bold d-block mb-2"><img src="assets/images/excellogo.png" alt="logo excel" style="width: 20px;"> El Excel:</h7>
+                                        <ul class="small ps-3 mb-0">
+                                            <li>La <strong>primera fila</strong> debe tener los nombres de las columnas.</li>
+                                            <li>Evita celdas combinadas en los encabezados.</li>
+                                            <li>Cada fila debajo será un documento generado.</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="card h-100 bg-light border-0">
+                                    <div class="card-body">
+                                        <h7 class="fw-bold d-block mb-2"><img src="assets/images/wordlogo.png" alt="logo word" style="width: 20px;"> El Word (Plantilla):</h7>
+                                        <ul class="small ps-3 mb-0">
+                                            <li>Escribe etiquetas entre llaves: <code>{Nombre}</code>, <code>{Identificacion}</code>.</li>
+                                            <li>Pueden estar en tablas, encabezados o pies de página.</li>
+                                            <li>Usa el mismo nombre para que sea fácil identificarlo.</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- Pasos Detallados -->
+                    <section class="mb-4">
+                        <h6 class="fw-bold text-dark"><i class="bi bi-2-square-fill"></i> Proceso Paso a Paso</h6>
+                        <div class="accordion accordion-flush" id="stepsAccordion">
+                            <div class="accordion-item">
+                                <h2 class="accordion-header">
+                                    <button class="accordion-button collapsed py-2" type="button" data-bs-toggle="collapse" data-bs-target="#stepExp1">
+                                        <strong>Paso 1 y 2:</strong> Carga de archivos
+                                    </button>
+                                </h2>
+                                <div id="stepExp1" class="accordion-collapse collapse" data-bs-parent="#stepsAccordion">
+                                    <div class="accordion-body small">
+                                        Arrastra el Excel primero y luego el Word, el sistema detectará automáticamente las columnas y las etiquetas de tu plantilla.
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="accordion-item">
+                                <h2 class="accordion-header">
+                                    <button class="accordion-button collapsed py-2" type="button" data-bs-toggle="collapse" data-bs-target="#stepExp2">
+                                        <strong>Paso 3:</strong> Mapeo (Conexión)
+                                    </button>
+                                </h2>
+                                <div id="stepExp2" class="accordion-collapse collapse" data-bs-parent="#stepsAccordion">
+                                    <div class="accordion-body small">
+                                        Aquí el programa relaciona los datos de Excel con las etiquetas de Word. Por ejemplo: "Donde dice, ej: <code>{Nombre}</code> en Word, pone lo que hay en la columna, ej: <strong>'CLIENTE'</strong> de Excel". Debes mapear todas las etiquetas antes de continuar.
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="accordion-item">
+                                <h2 class="accordion-header">
+                                    <button class="accordion-button collapsed py-2" type="button" data-bs-toggle="collapse" data-bs-target="#stepExp3">
+                                        <strong>Paso 4:</strong> Personalización y Generación
+                                    </button>
+                                </h2>
+                                <div id="stepExp3" class="accordion-collapse collapse" data-bs-parent="#stepsAccordion">
+                                    <div class="accordion-body small">
+                                        Elige cómo se llamarán los archivos. Puedes agregar un prefijo (ej: "Cuenta_") y seleccionar una columna de Excel para diferenciar cada archivo (ej: nombre de la persona).
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- Solución de Problemas -->
+                    <section class="mb-4">
+                        <h6 class="fw-bold text-danger"><i class="bi bi-3-square-fill"></i> Solución de Problemas Comunes</h6>
+                        <div class="bg-danger-subtle p-3 rounded-3 small border border-danger-subtle">
+                            <p class="mb-2"><strong>¿No aparecen mis etiquetas de Word?</strong><br>Asegúrate de que no tengan espacios internos como <code>{ Nombre }</code> (usa <code>{Nombre}</code>) y que el archivo sea formato <code>.docx</code>.</p>
+                            <p class="mb-2"><strong>¿Los números salen raros?</strong><br>En Excel, formatea las columnas de números o fechas como "Texto" si quieres que aparezcan exactamente como los ves.</p>
+                            <p class="mb-0"><strong>¿Un campo sale vacío?</strong><br>Si la celda en Excel está vacía, el programa dejará el espacio en blanco automáticamente.</p>
+                        </div>
+                    </section>
+
+                    <!-- Tips Finales -->
+                    <div class="alert alert-warning border-0 d-flex align-items-center mb-0" role="alert">
+                        <i class="bi bi-lightbulb fs-4 me-3"></i>
+                        <div class="small">
+                            <strong>Consejo:</strong> Usa siempre el botón <strong>"Vista Previa"</strong> antes de generar el lote completo para ahorrar tiempo y asegurarte de que todo encaje bien.
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer border-0">
+                    <button type="button" class="btn btn-success px-4" data-bs-dismiss="modal">¡Entendido, vamos a ello!</button>
+                </div>
             </div>
+        </div>
+    </div>
+
+    <footer class="container text-center py-1 mt-auto bg-footer">
+        <p class="mb-1 text-white">
+            Desarrollado por <strong>Ing. David Tejada</strong>
+            <br>
+            © 2026 <strong>DocuMapper</strong> - Todos los derechos reservados.
+        </p>
+        <div class="bg-white-footer rounded-4 d-flex justify-content-center gap-4 mx-auto py-1">
+            <a href="https://github.com/ingdave" target="_blank" class="text-decoration-none fw-semibold social-link" style="color: #181717;">
+                <i class="bi bi-github"></i> GitHub
+            </a>
+            <a href="https://www.linkedin.com/in/datejad/" target="_blank" class="text-decoration-none fw-semibold social-link" style="color: #0A66C2;">
+                <i class="bi bi-linkedin"></i> LinkedIn
+            </a>
         </div>
     </footer>
 

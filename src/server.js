@@ -1,3 +1,4 @@
+import 'dotenv/config';
 import express from 'express';
 import cors from 'cors';
 import multer from 'multer';
@@ -41,8 +42,8 @@ const upload = multer({ storage });
 app.post('/api/excel/parse', upload.single('file'), excelController.parseExcel);
 app.post('/api/word/extract-variables', upload.single('file'), wordController.extractVariables);
 app.post('/api/mapping/generate', mappingController.generateDocuments);
-app.post('/api/mapping/preview', mappingController.previewDocument);
 app.post('/api/mapping/download-all-docx', mappingController.downloadAllDocx);
+app.post('/api/mapping/download-all-pdf', mappingController.downloadAllPdf);
 
 // Ruta de descarga
 app.get('/api/download/:filename', (req, res) => {

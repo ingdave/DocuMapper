@@ -29,7 +29,7 @@ html {
 
 body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background: linear-gradient(135deg, #000000 0%, #3b3c3d 100%);
+    background: linear-gradient(135deg, #079005 0%, #0416bd 100%);
     background-repeat: no-repeat;
     background-attachment: fixed;
     background-size: cover;
@@ -298,6 +298,27 @@ footer p:last-child {
     border-radius: 6px;
     font-size: 0.95em;
     background: white;
+}
+
+/* Footer */
+.bg-footer {
+    background: none;
+    color: #e0e0e0;
+    border-top: none;
+}
+
+.bg-white-footer {
+    width:13rem;
+    height:2rem;
+    background-color: #ffffff;
+}
+
+.bg-footer a:hover {
+    transform: ease 0.3s translateY(-3px);
+}
+
+.social-link:hover {
+    transform: ease 0.3s translateY(-3px);
 }
 
 /* Responsive Design */

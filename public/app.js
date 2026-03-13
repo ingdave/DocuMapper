@@ -448,6 +448,7 @@ async function downloadAllDocx() {
     }
 
     const button = event.target;
+    const originalText = button.textContent;
     button.disabled = true;
     button.textContent = 'Preparando ZIP...';
 
@@ -475,10 +476,47 @@ async function downloadAllDocx() {
         showError(error.message);
     } finally {
         button.disabled = false;
-        button.textContent = 'Descargar TODO en ZIP (DOCX)';
+        button.textContent = originalText;
     }
 }
 
+async function downloadAllPdf() {
+    if (generatedFilenames.length === 0) {
+        showError('No hay documentos generados para descargar');
+        return;
+    }
 
+    const button = event.target;
+    const originalText = button.innerHTML;
+    button.disabled = true;
+    button.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Convirtiendo a PDF...';
+
+    try {
+        const response = await fetch(`${API_BASE}/mapping/download-all-pdf`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ filenames: generatedFilenames })
+        });
+
+        if (!response.ok) {
+            const error = await response.json();
+            throw new Error(error.error || 'Error creando PDF');
+        }
+
+        const result = await response.json();
+
+        if (result.downloadUrl) {
+            const link = document.createElement('a');
+            link.href = result.downloadUrl;
+            link.click();
+            showStatus('downloadList', `✓ ZIP de ${generatedFilenames.length} documentos PDF descargado`, true);
+        }
+    } catch (error) {
+        showError(error.message);
+    } finally {
+        button.disabled = false;
+        button.innerHTML = originalText;
+    }
+}
 // Inicializar
 showStep(1);

@@ -30,8 +30,8 @@ export const wordController = {
         const docXml = zip.file('word/document.xml');
         if (docXml) {
           const xmlContent = docXml.asText();
-          // Busca patrones {{ ... }} con espacios variables
-          const regex = /\{\{\s*([a-zA-Z0-9_áéíóúñ\s]+?)\s*\}\}/g;
+          // Busca patrones { ... } con espacios variables
+          const regex = /\{\s*([a-zA-Z0-9_áéíóúñ\s]+?)\s*\}/g;
           const matches = xmlContent.match(regex) || [];
           placeholders = [...new Set(matches.map(m => m.replace(/[{}]/g, '').trim()))].filter(p => p.length > 0);
           
@@ -43,7 +43,7 @@ export const wordController = {
         // Fallback: busca en el buffer completo
         try {
           const bufferStr = content.toString('latin1');
-          const regex = /\{\{([a-zA-Z0-9_áéíóúñ\s]+)\}\}/g;
+          const regex = /\{([a-zA-Z0-9_áéíóúñ\s]+)\}/g;
           const matches = bufferStr.match(regex) || [];
           placeholders = [...new Set(matches.map(m => m.replace(/[{}]/g, '').trim()))].filter(p => p.length > 0);
           

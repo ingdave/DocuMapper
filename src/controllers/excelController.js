@@ -1,4 +1,5 @@
 import ExcelJS from 'exceljs';
+import fs from 'fs';
 
 // Función para formatear valores según su tipo
 function formatValue(value) {
@@ -72,6 +73,11 @@ export const excelController = {
         data,
         totalRows: data.length,
         filename: req.file.originalname
+      });
+
+      // Limpiar archivo temporal después de parsear
+      fs.unlink(req.file.path, (err) => {
+        if (err) console.error('Error eliminando excel temporal:', err);
       });
 
     } catch (error) {
