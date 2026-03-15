@@ -8,9 +8,103 @@ let mappings = {};
 const API_BASE = '/api';
 
 // ===== UTILIDADES =====
+function showToast(message, type = 'info') {
+    const toastElement = document.getElementById('liveToast');
+    const toastTitle = document.getElementById('toastTitle');
+    const toastMessage = document.getElementById('toastMessage');
+    const toastIcon = document.getElementById('toastIcon');
+
+    // restablecer clases
+    toastTitle.parentElement.classList.remove('bg-success', 'bg-danger', 'bg-info', 'bg-warning', 'text-white');
+    
+    if (type === 'success') {
+        toastTitle.parentElement.classList.add('bg-success', 'text-white');
+        toastTitle.textContent = 'Éxito';
+        toastIcon.className = 'bi bi-check-circle-fill me-2';
+    } else if (type === 'error') {
+        toastTitle.parentElement.classList.add('bg-danger', 'text-white');
+        toastTitle.textContent = 'Error';
+        toastIcon.className = 'bi bi-exclamation-triangle-fill me-2';
+    } else if (type === 'warning') {
+        toastTitle.parentElement.classList.add('bg-warning', 'text-dark');
+        toastTitle.textContent = 'Advertencia';
+        toastIcon.className = 'bi bi-exclamation-circle-fill me-2';
+    } else {
+        toastTitle.parentElement.classList.add('bg-info', 'text-white');
+        toastTitle.textContent = 'Información';
+        toastIcon.className = 'bi bi-info-circle-fill me-2';
+    }
+
+    toastMessage.textContent = message;
+    
+    const toast = new bootstrap.Toast(toastElement);
+    toast.show();
+}
+
+// Interceptar consola para mostrar en UI
+const originalLog = console.log;
+const originalWarn = console.warn;
+const originalError = console.error;
+
+console.log = (...args) => {
+    originalLog(...args);
+    showToast(args.join(' '), 'info');
+};
+
+console.warn = (...args) => {
+    originalWarn(...args);
+    showToast(args.join(' '), 'warning');
+};
+
+console.error = (...args) => {
+    originalError(...args);
+    showToast(args.join(' '), 'error');
+};
+
 function showStep(stepNumber) {
     for (let i = 1; i <= 5; i++) {
-        document.getElementById(`step${i}`).style.display = i === stepNumber ? 'block' : 'none';
+        const stepElement = document.getElementById(`step${i}`);
+        if (stepElement) {
+            stepElement.style.display = i === stepNumber ? 'block' : 'none';
+        }
+    }
+    updateNavigationUI(stepNumber);
+}
+
+function updateNavigationUI(currentStep) {
+    const navItems = document.querySelectorAll('.step-nav-item');
+    navItems.forEach(item => {
+        const step = parseInt(item.getAttribute('data-step'));
+        item.classList.remove('active', 'completed');
+        
+        if (step === currentStep) {
+            item.classList.add('active');
+        } else if (step < currentStep) {
+            item.classList.add('completed');
+        }
+    });
+}
+
+function navigateToStep(stepNumber) {
+    // Validar si el usuario puede ir a ese paso
+    if (stepNumber === 1) {
+        showStep(1);
+    } else if (stepNumber === 2 && excelData) {
+        showStep(2);
+    } else if (stepNumber === 3 && wordPlaceholders.length > 0) {
+        showStep(3);
+    } else if (stepNumber === 4 && Object.keys(mappings).length === wordPlaceholders.length && wordPlaceholders.length > 0) {
+        showStep(4);
+    } else if (stepNumber === 5 && generatedFilenames.length > 0) {
+        showStep(5);
+    } else {
+        const messages = {
+            2: 'Primero debes cargar un archivo Excel.',
+            3: 'Primero debes cargar una plantilla Word.',
+            4: 'Primero debes completar el mapeo de todos los campos.',
+            5: 'Primero debes generar los documentos.'
+        };
+        showToast(messages[stepNumber] || 'No puedes saltar a este paso todavía.', 'warning');
     }
 }
 
@@ -26,7 +120,7 @@ function showStatus(elementId, message, isSuccess, isError = false) {
 }
 
 function showError(message) {
-    alert('Error: ' + message);
+    showToast(message, 'error');
 }
 
 // ===== EXCEL UPLOAD =====
