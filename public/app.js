@@ -291,10 +291,10 @@ function createMappingUI() {
 
     wordPlaceholders.forEach(placeholder => {
         const item = document.createElement('div');
-        item.className = 'mapping-item p-3 mb-3';
+        item.className = 'mapping-item p-1 mb-1';
 
         const row = document.createElement('div');
-        row.className = 'row g-3';
+        row.className = 'row g-1';
 
         const col1 = document.createElement('div');
         col1.className = 'col-12 col-sm-6';
@@ -354,7 +354,7 @@ function updateMappingStatus() {
 
         // Poblar selector de columna para nombre de archivo
         const filenameSelect = document.getElementById('filenameColumnSelect');
-        filenameSelect.innerHTML = '<option value="">-- Selecciona la columna del contratista --</option>';
+        filenameSelect.innerHTML = '<option value="">-- Selecciona valor del prefijo --</option>';
         excelHeaders.forEach(header => {
             const option = document.createElement('option');
             option.value = header;

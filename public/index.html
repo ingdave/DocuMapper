@@ -41,7 +41,7 @@
 
 <body class="d-flex flex-column min-vh-100">
     <div class="container-fluid flex-grow-1 py-2">
-        <header class="text-white text-center mb-2 position-relative">
+        <header class="header text-white text-center mb-2 position-relative">
             <div class="row align-items-center justify-content-center">
                 <div class="col-md-8">
                     <h1 class="display-4 mb-2">
@@ -58,7 +58,7 @@
 
         <!-- Menú de Navegación por Pasos -->
         <nav class="step-navigation mb-2" id="stepNavigation">
-            <div class="d-flex justify-content-between">
+            <div class="d-flex justify-content-between step-nav">
                 <div class="step-nav-item active" data-step="1" onclick="navigateToStep(1)">
                     <div class="step-label">Excel</div>
                 </div>
@@ -188,7 +188,7 @@
                     <div class="mb-3">
                         <label class="form-label fw-bold">Selecciona el diferenciador:</label>
                         <select id="filenameColumnSelect" class="form-select">
-                            <option value="">-- Selecciona la columna del contratista --</option>
+                            <option value="">-- Selecciona valor del prefijo --</option>
                         </select>
                     </div>
                     <button class="btn btn-success btn-lg w-50 mb-4 mx-auto d-block" onclick="generateAllDocuments()">
@@ -376,7 +376,7 @@
 
     <footer class="container text-center py-1 mt-auto bg-footer">
         <p class="mb-3 text-white">
-            Desarrollado por <strong>Ing. David Tejada</strong>
+            Desarrollado por <strong> <a href="https://ingdave.github.io/Portafolio/" target="_blank" class="text-white text-decoration-none">Ing David Tejada</a></strong>
             <br>
             © 2026 <strong>DocuMapper</strong> - Todos los derechos reservados.
         </p>

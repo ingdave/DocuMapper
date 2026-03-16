@@ -55,6 +55,15 @@ header p {
     font-weight: 500;
 }
 
+header img {
+    transition: all 0.3s ease-in-out;
+
+    &&:hover {
+        transform: translateY(-3px);
+        filter: drop-shadow(0 6px 12px rgba(0, 0, 0, 0.2));
+    }
+}
+
 /* Navegación por Pasos (Estilo Flechas) */
 .step-navigation {
     background: transparent;
@@ -70,13 +79,22 @@ header p {
     cursor: pointer;
     transition: all 0.3s ease;
     flex: 1;
-    padding: 5px 15px;
     position: relative;
     background: rgba(255, 255, 255, 0.1);
     color: #fff;
     clip-path: polygon(95% 0%, 100% 50%, 95% 100%, 0% 100%, 5% 50%, 0% 0%);
     margin-right: -10px;
     opacity: 0.6;
+    transition: all 0.3s ease-in-out;
+
+    &&:hover {
+
+        transform: translateY(-3px);
+    }
+}
+
+.step-nav {
+    gap: 0.7rem !important;
 }
 
 .step-nav-item:first-child {
@@ -92,14 +110,14 @@ header p {
 
 .step-nav-item.active {
     opacity: 1;
-    background: #007bff;
+    background: #7a7a7aa8;
     z-index: 5;
     transform: scale(1.02);
 }
 
 .step-nav-item.completed {
     opacity: 0.9;
-    background: #28a745;
+    background: #1ead3f;
 }
 
 .step-label {
@@ -107,7 +125,8 @@ header p {
     color: #fff;
     font-weight: 800;
     text-transform: uppercase;
-    letter-spacing: 1px}
+    letter-spacing: 1px
+}
 
 .content {
     display: flex;
