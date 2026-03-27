@@ -523,7 +523,7 @@ window.onclick = function (event) {
 
 // ===== GENERACIÓN DE DOCUMENTOS =====
 async function generateAllDocuments() {
-    const button = event.target;
+    const button = event.currentTarget || event.target.closest('button');
     const progressDiv = document.getElementById('generationProgress');
     const progressFill = document.getElementById('progressFill');
     const progressText = document.getElementById('progressText');
@@ -639,10 +639,10 @@ async function downloadAllDocx() {
         return;
     }
 
-    const button = event.target;
-    const originalText = button.textContent;
+    const button = event.currentTarget || event.target.closest('button');
+    const originalHTML = button.innerHTML;
     button.disabled = true;
-    button.textContent = 'Preparando ZIP...';
+    button.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Preparando ZIP...';
 
     try {
         const response = await fetch(`${API_BASE}/mapping/download-all-docx`, {
@@ -661,14 +661,18 @@ async function downloadAllDocx() {
         if (result.downloadUrl) {
             const link = document.createElement('a');
             link.href = result.downloadUrl;
+            link.download = '';
+            link.style.display = 'none';
+            document.body.appendChild(link);
             link.click();
-            showStatus('downloadList', `✓ ZIP de ${generatedFilenames.length} documentos DOCX descargado`, true);
+            document.body.removeChild(link);
+            showToast(`✓ ZIP de ${generatedFilenames.length} documentos DOCX listo para descarga`, 'success');
         }
     } catch (error) {
         showError(error.message);
     } finally {
         button.disabled = false;
-        button.textContent = originalText;
+        button.innerHTML = originalHTML;
     }
 }
 
@@ -678,8 +682,8 @@ async function downloadAllPdf() {
         return;
     }
 
-    const button = event.target;
-    const originalText = button.innerHTML;
+    const button = event.currentTarget || event.target.closest('button');
+    const originalHTML = button.innerHTML;
     button.disabled = true;
     button.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Convirtiendo a PDF...';
 
@@ -700,14 +704,18 @@ async function downloadAllPdf() {
         if (result.downloadUrl) {
             const link = document.createElement('a');
             link.href = result.downloadUrl;
+            link.download = '';
+            link.style.display = 'none';
+            document.body.appendChild(link);
             link.click();
-            showStatus('downloadList', `✓ ZIP de ${generatedFilenames.length} documentos PDF descargado`, true);
+            document.body.removeChild(link);
+            showToast(`✓ ZIP de ${generatedFilenames.length} documentos PDF listo para descarga`, 'success');
         }
     } catch (error) {
         showError(error.message);
     } finally {
         button.disabled = false;
-        button.innerHTML = originalText;
+        button.innerHTML = originalHTML;
     }
 }
 // Inicializador
