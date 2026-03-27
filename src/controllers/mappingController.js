@@ -122,8 +122,13 @@ export const mappingController = {
       let successCount = 0;
       let errorCount = 0;
 
+      // Leer la plantilla UNA SOLA VEZ antes del loop (optimización I/O)
+      const templateBuffer = fs.readFileSync(templatePath);
+      const generationStart = Date.now();
+
       // Generar un documento por cada fila de datos
       for (let i = 0; i < excelData.length; i++) {
+        const rowStart = Date.now();
         try {
           const row = excelData[i];
           
@@ -134,8 +139,8 @@ export const mappingController = {
             mappedData[placeholder] = formatNumberValue(row[excelColumn], format);
           }
 
-          const content = fs.readFileSync(templatePath);
-          const zip = new PizZip(content);
+          // Instanciar PizZip desde el buffer en memoria (sin I/O de disco por fila)
+          const zip = new PizZip(templateBuffer);
           
           let buffer;
           let filename;
@@ -159,6 +164,7 @@ export const mappingController = {
             fs.writeFileSync(filepath, buffer);
             generatedFiles.push({ filename, index: i + 1 });
             successCount++;
+            console.log(`✓ Doc ${i + 1}/${excelData.length} generado en ${Date.now() - rowStart}ms`);
             
           } catch (docError) {
             console.warn(`Fila ${i + 1} - Docxtemplater falló, usando alternativa:`, docError.message);
