@@ -1,4 +1,4 @@
-# 📘 Manual de Usuario - docuMapper
+#Manual de Usuario - docuMapper
 
 ## Tabla de Contenidos
 1. [Introducción](#introducción)
@@ -22,11 +22,11 @@
 
 ### ¿Para qué sirve?
 
-- 📊 **Automatizar reportes**: Genera reportes individuales para cada fila de Excel
-- 💼 **Documentos personalizados**: Cada documento se llena con los datos correspondientes
-- ⚡ **Ahorra tiempo**: En lugar de escribir 100 documentos uno por uno
-- 🎨 **Conserva formato**: Los estilos y formato de la plantilla Word se mantienen
-- 📈 **Exporta múltiples formatos**: DOCX y PDF
+- **Automatizar reportes**: Genera reportes individuales para cada fila de Excel
+- **Documentos personalizados**: Cada documento se llena con los datos correspondientes
+- **Ahorra tiempo**: En lugar de escribir 100 documentos uno por uno
+- **Conserva formato**: Los estilos y formato de la plantilla Word se mantienen
+- **Exporta múltiples formatos**: DOCX y PDF
 
 ### Ejemplo práctico:
 
@@ -50,62 +50,13 @@ Tienes un Excel con 50 vendedores y quieres generar 50 certificados de venta (un
 - **navegador web moderno** (Chrome, Firefox, Edge)
 
 ### Archivos necesarios:
-- ✅ Archivo Excel (.xlsx o .xls)
-- ✅ Plantilla Word (.docx)
-
+- Archivo Excel (.xlsx o .xls)
+- Plantilla Word (.docx)
 ---
 
-## Instalación y Configuración
+## Instalación-y-configuración
 
-### Opción 1: Instalación desde terminal
-
-1. **Abre PowerShell** o Terminal en la carpeta del proyecto:
-   ```powershell
-   cd C:\Users\TuUsuario\Dev\docuMapper
-   ```
-
-2. **Instala dependencias**:
-   ```powershell
-   npm install
-   ```
-
-3. **Inicia el servidor**:
-   ```powershell
-   npm start
-   ```
-
-4. **Abre tu navegador**:
-   - Ve a: `http://localhost:3000`
-   - Verás la interfaz de carga
-
-### Opción 2: Instalación desde Visual Studio Code
-
-1. Abre VS Code
-2. Abre la carpeta `docuMapper`
-3. Abre la terminal integrada (Ctrl + `)
-4. Ejecuta: `npm install && npm start`
-
----
-
-## Interfaz Principal
-
-```
-┌─────────────────────────────────────────┐
-│          docuMapper - Paso 1/5           │
-│                                         │
-│  ☑ Paso 1: Cargar Excel                │
-│  ○ Paso 2: Cargar Plantilla Word       │
-│  ○ Paso 3: Mapear Campos               │
-│  ○ Paso 4: Configurar Generación       │
-│  ○ Paso 5: Descargar Documentos        │
-│                                         │
-│  [Interfaz del paso actual]             │
-│                                         │
-│  [← Anterior]              [Siguiente →] │
-└─────────────────────────────────────────┘
-```
-
----
+Ingresa a https://documapper.onrender.com/
 
 ## Paso 1: Cargar Excel
 
@@ -113,8 +64,8 @@ Tienes un Excel con 50 vendedores y quieres generar 50 certificados de venta (un
 Cargas el archivo Excel que contiene los datos que se van a usar en los documentos.
 
 ### Requisitos del Excel:
-✅ **Formato**: .xlsx o .xls
-✅ **Estructura**: 
+**Formato**: .xlsx o .xls
+**Estructura**: 
 - Primera fila = nombres de columnas (headers)
 - Filas siguientes = datos
 
@@ -139,10 +90,10 @@ Cargas el archivo Excel que contiene los datos que se van a usar en los document
 3. Selecciona tu archivo Excel
 
 ### ¿Qué detecta docuMapper?
-- ✅ Nombres de columnas
-- ✅ Número de filas
-- ✅ **Formatos de celdas** (Moneda, Porcentaje, Miles)
-- ✅ Tipos de datos
+- Nombres de columnas
+- Número de filas
+- **Formatos de celdas** (Moneda, Porcentaje, Miles)
+- Tipos de datos
 
 ### Ejemplo de detección de formatos:
 
@@ -166,8 +117,8 @@ Avanza al Paso 2
 Cargas el archivo Word (.docx) que será la plantilla para generar todos los documentos.
 
 ### Requisitos de la Plantilla:
-✅ **Formato**: .docx (Word 2007+)
-✅ **Placeholders**: Variables en formato `{nombre_variable}`
+**Formato**: .docx (Word 2007+)
+**Placeholders**: Variables en formato `{nombre_variable}`
 
 ### Cómo crear placeholders en Word:
 
@@ -204,11 +155,11 @@ Autorizado por: _________________
 
 ### Características de los placeholders:
 
-- ✅ Pueden estar en cualquier parte del documento
-- ✅ Múltiples en el mismo párrafo: `{nombre} vendió {cantidad} unidades por ${monto}`
-- ✅ Insensibles a mayúsculas/minúsculas: `{Nombre}`, `{nombre}`, `{NOMBRE}` funcionan igual
-- ✅ Permiten espacios: `{ nombre }` es válido
-- ✅ Caracteres especiales: soportan acentos y ñ
+- Pueden estar en cualquier parte del documento
+- Múltiples en el mismo párrafo: `{nombre} vendió {cantidad} unidades por ${monto}`
+- Insensibles a mayúsculas/minúsculas: `{Nombre}`, `{nombre}`, `{NOMBRE}` funcionan igual
+- Permiten espacios: `{ nombre }` es válido
+- Caracteres especiales: soportan acentos y ñ
 
 ### Cómo subir la Plantilla:
 
@@ -270,7 +221,7 @@ Mapeos completados: 4/4 ✓
 
 ### Detección Automática:
 
-✨ **docuMapper detecta automáticamente:**
+**docuMapper detecta automáticamente:**
 - Si una columna tiene formato de Moneda en Excel → sugiere "Moneda ($)"
 - Si tiene Porcentaje → sugiere "Porcentaje (%)"
 - Si tiene Miles → sugiere "Con separador"
@@ -296,8 +247,8 @@ Comisión: $ 7.500,00
 ```
 
 **Validaciones:**
-- ❌ No puedes avanzar si falta mapear algún placeholder
-- ❌ No puedes dejar campos en blanco
+- No puedes avanzar si falta mapear algún placeholder
+- No puedes dejar campos en blanco
 
 ---
 
@@ -345,7 +296,7 @@ Ejemplos:
 ### Resumen antes de generar:
 
 ```
-📊 Vas a generar:
+Vas a generar:
    • 3 documentos
    • Basados en: plantilla.docx
    • Con 4 campos mapeados
@@ -413,7 +364,7 @@ Los archivos se descargan a tu carpeta estándar de descargas:
 
 ### Limpieza automática:
 
-⏰ Los archivos en el servidor se borran automáticamente después de **15 minutos** si no los descargas.
+Los archivos en el servidor se borran automáticamente después de **15 minutos** si no los descargas.
 
 ---
 
@@ -445,11 +396,11 @@ Los archivos se descargan a tu carpeta estándar de descargas:
 
 ### P: ¿Qué formatos de Excel se detectan?
 **R:**
-- ✅ Moneda ($, €, £, ¥)
-- ✅ Porcentaje (%)
-- ✅ Miles (#,##0)
-- ✅ Fechas
-- ✅ Números normales
+- Moneda ($, €, £, ¥)
+- Porcentaje (%)
+- Miles (#,##0)
+- Fechas
+- Números normales
 
 ### P: ¿Puedo usar caracteres especiales en placeholders?
 **R:** No, solo letras, números, guiones bajos y acentos: `{nombre_completo}`, `{monto_venta}`
@@ -461,7 +412,7 @@ Los archivos se descargan a tu carpeta estándar de descargas:
 
 ## Solución de Problemas
 
-### ❌ Problema: "No se cargó ningún archivo"
+### Problema: "No se cargó ningún archivo"
 
 **Causas:**
 - El archivo no es Excel válido
@@ -474,7 +425,7 @@ Los archivos se descargan a tu carpeta estándar de descargas:
 
 ---
 
-### ❌ Problema: "El Excel no tiene encabezados"
+### Problema: "El Excel no tiene encabezados"
 
 **Causas:**
 - La primera fila está vacía
@@ -482,12 +433,12 @@ Los archivos se descargan a tu carpeta estándar de descargas:
 
 **Solución:**
 ```
-❌ Incorrecto:
+Incorrecto:
    [Fila 1: vacía]
    [Fila 2: nombres]
    [Fila 3: datos]
 
-✅ Correcto:
+Correcto:
    [Fila 1: nombres]
    [Fila 2: datos]
    [Fila 3: datos]
@@ -495,7 +446,7 @@ Los archivos se descargan a tu carpeta estándar de descargas:
 
 ---
 
-### ❌ Problema: "No se encontraron placeholders en Word"
+### Problema: "No se encontraron placeholders en Word"
 
 **Causas:**
 - El archivo no es Word válido (.docx)
@@ -505,13 +456,13 @@ Los archivos se descargan a tu carpeta estándar de descargas:
 
 Verifica los placeholders en tu plantilla:
 ```
-❌ Incorrecto:
+ Incorrecto:
    - $nombre$
    - [nombre]
    - <nombre>
    - nombre
 
-✅ Correcto:
+Correcto:
    - {nombre}
    - {nombre_completo}
    - { nombre }  (con espacios es OK)
@@ -519,7 +470,7 @@ Verifica los placeholders en tu plantilla:
 
 ---
 
-### ❌ Problema: "No se puede encontrar la columna en Excel"
+### Problema: "No se puede encontrar la columna en Excel"
 
 **Causas:**
 - El nombre de la columna en Excel tiene espacios o caracteres diferentes
@@ -537,7 +488,7 @@ selecciona exactamente "Nombre Completo" en el mapeo
 
 ---
 
-### ❌ Problema: Los formatos de Excel no aparecen en Paso 3
+### Problema: Los formatos de Excel no aparecen en Paso 3
 
 **Causas:**
 - La columna no tiene datos en las primeras 5 filas
@@ -549,7 +500,7 @@ selecciona exactamente "Nombre Completo" en el mapeo
 
 ---
 
-### ❌ Problema: Los documentos generados están vacíos
+### Problema: Los documentos generados están vacíos
 
 **Causas:**
 - Los placeholders en Word no coinciden exactamente
@@ -562,7 +513,7 @@ selecciona exactamente "Nombre Completo" en el mapeo
 
 ---
 
-### ❌ Problema: "Error al generar documentos"
+### Problema: "Error al generar documentos"
 
 **Causas:**
 - Falta espacio en disco
@@ -576,7 +527,7 @@ selecciona exactamente "Nombre Completo" en el mapeo
 
 ---
 
-### ❌ Problema: Los PDFs no se descargan
+### Problema: Los PDFs no se descargan
 
 **Causas:**
 - API de ConvertAPI no está configurada
@@ -591,16 +542,16 @@ selecciona exactamente "Nombre Completo" en el mapeo
 
 ## Consejos y Mejores Prácticas
 
-### 📋 Preparación de Excel
+### Preparación de Excel
 
 **1. Estructura clara:**
 ```
-✅ BUENO:
+ BUENO:
    | Nombre | Monto | Fecha |
    |--------|-------|-------|
    | Juan   | 1000  | fecha |
 
-❌ MALO:
+ MALO:
    | NOMBRE | monto | FECHA |
    |--------|-------|-------|
    |        | 1000  | fecha |  (Primera fila parcial)
@@ -612,21 +563,21 @@ selecciona exactamente "Nombre Completo" en el mapeo
 - Fechas: Usa formato `DD/MM/YYYY`
 
 **3. Evita:**
-- ❌ Espacios en blanco al inicio/final de celdas
-- ❌ Saltos de línea dentro de celdas
-- ❌ Caracteres especiales (excepto acentos, ñ)
+- Espacios en blanco al inicio/final de celdas
+- Saltos de línea dentro de celdas
+-  Caracteres especiales (excepto acentos, ñ)
 
 ---
 
-### 📄 Creación de Plantillas Word
+###  Creación de Plantillas Word
 
 **1. Estructura clara:**
 ```
-✅ BUENO:
+ BUENO:
    Certifico que {nombre} ha vendido {cantidad} unidades
    por un monto de {monto}
 
-❌ MALO:
+ MALO:
    cert... que {nombre}, quien vendio {cantidad} unidades
    por monto de {monto}  (espacios/acentos inconsistentes)
 ```
@@ -643,12 +594,12 @@ selecciona exactamente "Nombre Completo" en el mapeo
 
 **4. Placeholders en tablas:**
 ```
-✅ Funciona:
+ Funciona:
    | Concepto      | Valor      |
    |-------|-----------|
    | Total | {monto}   |
 
-❌ Evita:
+ Evita:
    | Concepto      | Valor      |
    |-------|-----------|
    | Tot{al} | {mont}o   |  (fragmentado)
@@ -656,7 +607,7 @@ selecciona exactamente "Nombre Completo" en el mapeo
 
 ---
 
-### ⚙️ Optimización
+### Optimización
 
 **Para generar rápidamente:**
 1. Mantén Excel con datos limpios
@@ -671,7 +622,7 @@ selecciona exactamente "Nombre Completo" en el mapeo
 
 ---
 
-### 🔄 Flujo Recomendado
+### Flujo Recomendado
 
 ```
 1. ✓ Prepara Excel (datos limpios)
@@ -689,7 +640,7 @@ selecciona exactamente "Nombre Completo" en el mapeo
 
 ---
 
-### 📊 Límites Recomendados
+### Límites Recomendados
 
 | Cantidad | Tiempo Estimado | Recomendación |
 |----------|-----------------|---------------|
@@ -701,7 +652,7 @@ selecciona exactamente "Nombre Completo" en el mapeo
 
 ---
 
-### 🎯 Casos de Uso Comunes
+### Casos de Uso Comunes
 
 #### Certificados de Capacitación
 ```
@@ -744,10 +695,8 @@ Word:  Reporte de {vendedor} - {mes}
 
 Si experimentas problemas no cubiertos en este manual:
 
-1. **Revisa los logs** en la terminal donde corre `npm start`
-2. **Verifica la configuración** de archivos Excel/Word
-3. **Reinicia el servidor**: Ctrl+C y `npm start` nuevamente
-4. **Limpia navegador**: Ctrl+Shift+Delete (caché)
+1. **Verifica la configuración** de archivos Excel/Word
+2. **Limpia navegador**: Ctrl+Shift+Delete (caché)
 
 ---
 
