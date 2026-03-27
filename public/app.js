@@ -72,21 +72,8 @@ function showToast(message, type = 'info') {
     toast.show();
 }
 
-// Interceptar consola para mostrar en UI
-const originalLog = console.log;
-const originalWarn = console.warn;
+// Solo mostrar errores reales en Toast (no interceptar toda la consola)
 const originalError = console.error;
-
-console.log = (...args) => {
-    originalLog(...args);
-    showToast(args.join(' '), 'info');
-};
-
-console.warn = (...args) => {
-    originalWarn(...args);
-    showToast(args.join(' '), 'warning');
-};
-
 console.error = (...args) => {
     originalError(...args);
     showToast(args.join(' '), 'error');
