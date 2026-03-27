@@ -688,4 +688,4 @@ async function downloadAllPdf() {
     }
 }
 // Inicializar
-showStep(4);
+showStep(1);
