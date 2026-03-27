@@ -695,10 +695,8 @@ Word:  Reporte de {vendedor} - {mes}
 
 Si experimentas problemas no cubiertos en este manual:
 
-1. **Revisa los logs** en la terminal donde corre `npm start`
-2. **Verifica la configuración** de archivos Excel/Word
-3. **Reinicia el servidor**: Ctrl+C y `npm start` nuevamente
-4. **Limpia navegador**: Ctrl+Shift+Delete (caché)
+1. **Verifica la configuración** de archivos Excel/Word
+2. **Limpia navegador**: Ctrl+Shift+Delete (caché)
 
 ---
 
