@@ -687,5 +687,5 @@ async function downloadAllPdf() {
         button.innerHTML = originalText;
     }
 }
-// Inicializar
+// Inicializador
 showStep(1);
