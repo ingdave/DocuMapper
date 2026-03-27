@@ -422,7 +422,7 @@ function updateMappingStatus() {
 
         // Poblar selector de columna para nombre de archivo
         const filenameSelect = document.getElementById('filenameColumnSelect');
-        filenameSelect.innerHTML = '<option value="">-- Selecciona valor del prefijo --</option>';
+        filenameSelect.innerHTML = '<option value="">Selecciona valor del prefijo</option>';
         excelHeaders.forEach(header => {
             const option = document.createElement('option');
             option.value = header;
@@ -688,4 +688,4 @@ async function downloadAllPdf() {
     }
 }
 // Inicializar
-showStep(1);
+showStep(4);
