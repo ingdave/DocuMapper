@@ -4,8 +4,34 @@ let excelHeaders = [];
 let wordPlaceholders = [];
 let templateId = null;
 let mappings = {};
+let formatOptions = {};
 
 const API_BASE = '/api';
+
+// Función para formatear números en el cliente (preview)
+function formatNumberClient(value, formatType) {
+    const num = typeof value === 'number' ? value : parseFloat(value);
+    if (isNaN(num)) return String(value || '');
+
+    const hasDecimals = num % 1 !== 0;
+    const decimals = hasDecimals ? 2 : 0;
+
+    function fmtThousands(n) {
+        const parts = Math.abs(n).toFixed(decimals).split('.');
+        parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+        const formatted = parts.length > 1 ? parts[0] + ',' + parts[1] : parts[0];
+        return n < 0 ? '-' + formatted : formatted;
+    }
+
+    switch (formatType) {
+        case 'currency':
+            return '$ ' + fmtThousands(num);
+        case 'thousands':
+            return fmtThousands(num);
+        default:
+            return String(value);
+    }
+}
 
 // ===== UTILIDADES =====
 function showToast(message, type = 'info') {
@@ -294,10 +320,10 @@ function createMappingUI() {
         item.className = 'mapping-item p-1 mb-1';
 
         const row = document.createElement('div');
-        row.className = 'row g-1';
+        row.className = 'row g-1 align-items-end';
 
         const col1 = document.createElement('div');
-        col1.className = 'col-12 col-sm-6';
+        col1.className = 'col-12 col-sm-4';
 
         const labelLeft = document.createElement('label');
         labelLeft.className = 'form-label fw-bold';
@@ -305,7 +331,7 @@ function createMappingUI() {
         col1.appendChild(labelLeft);
 
         const col2 = document.createElement('div');
-        col2.className = 'col-12 col-sm-6';
+        col2.className = 'col-12 col-sm-4';
 
         const labelRight = document.createElement('label');
         labelRight.className = 'form-label fw-bold';
@@ -323,8 +349,49 @@ function createMappingUI() {
             selectRight.appendChild(option);
         });
 
+        // Col3: Selector de formato (solo visible para columnas numéricas)
+        const col3 = document.createElement('div');
+        col3.className = 'col-12 col-sm-4';
+        col3.style.display = 'none';
+
+        const labelFormat = document.createElement('label');
+        labelFormat.className = 'form-label fw-bold';
+        labelFormat.textContent = 'Formato:';
+        col3.appendChild(labelFormat);
+
+        const selectFormat = document.createElement('select');
+        selectFormat.className = 'form-select';
+        selectFormat.innerHTML = `
+            <option value="raw">Sin formato (tal cual)</option>
+            <option value="currency">Moneda ($ X.XXX)</option>
+            <option value="thousands">Con separador (X.XXX)</option>
+        `;
+
+        selectFormat.addEventListener('change', (e) => {
+            formatOptions[placeholder] = e.target.value;
+        });
+
+        col3.appendChild(selectFormat);
+
         selectRight.addEventListener('change', (e) => {
             mappings[placeholder] = e.target.value;
+
+            // Mostrar/ocultar selector de formato según si la columna es numérica
+            if (e.target.value && excelData && excelData.length > 0) {
+                const isNumeric = excelData.slice(0, 5).some(r => typeof r[e.target.value] === 'number');
+                if (isNumeric) {
+                    col3.style.display = '';
+                } else {
+                    col3.style.display = 'none';
+                    formatOptions[placeholder] = 'raw';
+                    selectFormat.value = 'raw';
+                }
+            } else {
+                col3.style.display = 'none';
+                formatOptions[placeholder] = 'raw';
+                selectFormat.value = 'raw';
+            }
+
             updateMappingStatus();
         });
 
@@ -332,6 +399,7 @@ function createMappingUI() {
 
         row.appendChild(col1);
         row.appendChild(col2);
+        row.appendChild(col3);
         item.appendChild(row);
         container.appendChild(item);
     });
@@ -389,7 +457,12 @@ async function showPreview() {
         const mappedData = {};
 
         for (const [placeholder, columnName] of Object.entries(mappings)) {
-            mappedData[placeholder] = sampleData[columnName] || '(vacío)';
+            let value = sampleData[columnName];
+            const format = formatOptions[placeholder] || 'raw';
+            if (format !== 'raw' && value !== undefined && value !== null && value !== '') {
+                value = formatNumberClient(value, format);
+            }
+            mappedData[placeholder] = (value !== undefined && value !== null && value !== '') ? value : '(vacío)';
         }
 
         // Mostrar en la UI
@@ -464,7 +537,8 @@ async function generateAllDocuments() {
                 excelData,
                 filenameColumn: document.getElementById('filenameColumnSelect').value,
                 month: document.getElementById('monthSelect').value,
-                initialName: initialName
+                initialName: initialName,
+                formatOptions: formatOptions
             })
         });
 
@@ -522,6 +596,7 @@ function resetForm() {
     wordPlaceholders = [];
     templateId = null;
     mappings = {};
+    formatOptions = {};
 
     document.getElementById('excelInput').value = '';
     document.getElementById('wordInput').value = '';

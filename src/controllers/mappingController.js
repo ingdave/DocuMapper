@@ -43,6 +43,37 @@ function stringifyValue(value) {
   return String(value);
 }
 
+// Función para formatear números con separador de miles (formato colombiano: . miles, , decimales)
+function formatWithThousands(num) {
+  const hasDecimals = num % 1 !== 0;
+  const decimals = hasDecimals ? 2 : 0;
+  const parts = Math.abs(num).toFixed(decimals).split('.');
+  parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+  const formatted = parts.length > 1 ? parts[0] + ',' + parts[1] : parts[0];
+  return num < 0 ? '-' + formatted : formatted;
+}
+
+// Función para formatear valores numéricos según opción del usuario
+function formatNumberValue(value, formatType) {
+  if (!formatType || formatType === 'raw') {
+    return stringifyValue(value);
+  }
+
+  const num = typeof value === 'number' ? value : parseFloat(String(value).replace(/[^0-9.\-]/g, ''));
+  if (isNaN(num)) {
+    return stringifyValue(value);
+  }
+
+  switch (formatType) {
+    case 'currency':
+      return '$ ' + formatWithThousands(num);
+    case 'thousands':
+      return formatWithThousands(num);
+    default:
+      return stringifyValue(value);
+  }
+}
+
 // Meses en español abreviados
 const MESES_ES = ['ENE', 'FEB', 'MAR', 'ABR', 'MAY', 'JUN', 'JUL', 'AGO', 'SEP', 'OCT', 'NOV', 'DIC'];
 
@@ -76,7 +107,7 @@ export const mappingController = {
 
   generateDocuments: async (req, res) => {
     try {
-      const { templateId, mappings, excelData, filenameColumn, month, initialName } = req.body;
+      const { templateId, mappings, excelData, filenameColumn, month, initialName, formatOptions } = req.body;
 
       if (!templateId || !mappings || !excelData) {
         return res.status(400).json({ error: 'Campos obligatorios faltantes' });
@@ -99,7 +130,8 @@ export const mappingController = {
           // Mapear datos con placeholders - convertir a strings
           const mappedData = {};
           for (const [placeholder, excelColumn] of Object.entries(mappings)) {
-            mappedData[placeholder] = stringifyValue(row[excelColumn]);
+            const format = formatOptions?.[placeholder] || 'raw';
+            mappedData[placeholder] = formatNumberValue(row[excelColumn], format);
           }
 
           const content = fs.readFileSync(templatePath);

@@ -24,7 +24,9 @@ function formatValue(value) {
     return String(value);
   }
   
-  // Para números y strings, devolver como está
+  // Para números, mantener como número para permitir formateo posterior
+  if (typeof value === 'number') return value;
+  
   return String(value);
 }
 
