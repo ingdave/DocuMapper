@@ -45,21 +45,38 @@ app.post('/api/mapping/generate', mappingController.generateDocuments);
 app.post('/api/mapping/download-all-docx', mappingController.downloadAllDocx);
 app.post('/api/mapping/download-all-pdf', mappingController.downloadAllPdf);
 
-// Ruta de descarga
+// Ruta de descarga - SIN borrar archivos automáticamente
 app.get('/api/download/:filename', (req, res) => {
   const filename = req.params.filename;
   const filepath = path.join(downloadsDir, filename);
   
   if (fs.existsSync(filepath)) {
-    res.download(filepath, () => {
-      fs.unlink(filepath, (err) => {
-        if (err) console.error('Error eliminando archivo:', err);
-      });
-    });
+    res.download(filepath);
   } else {
     res.status(404).json({ error: 'Archivo no encontrado' });
   }
 });
+
+// Limpiar archivos antiguos de downloads (cada 5 minutos borra >15 minutos)
+setInterval(() => {
+  const now = Date.now();
+  const maxAge = 15 * 60 * 1000; // 15 minutos
+  
+  fs.readdir(downloadsDir, (err, files) => {
+    if (err) return;
+    files.forEach(file => {
+      const filepath = path.join(downloadsDir, file);
+      fs.stat(filepath, (err, stats) => {
+        if (!err && now - stats.mtimeMs > maxAge) {
+          fs.unlink(filepath, (err) => {
+            if (err) console.error(`Error eliminando ${file}:`, err);
+            else console.log(`✓ Limpiado: ${file}`);
+          });
+        }
+      });
+    });
+  });
+}, 5 * 60 * 1000); // Ejecutar cada 5 minutos
 
 // Health check
 app.get('/api/health', (req, res) => {

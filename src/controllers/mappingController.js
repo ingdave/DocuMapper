@@ -69,6 +69,10 @@ function formatNumberValue(value, formatType) {
       return '$ ' + formatWithThousands(num);
     case 'thousands':
       return formatWithThousands(num);
+    case 'percentage':
+      // Multiplicar por 100 si el valor es decimal (ej: 0.25 -> 25%)
+      const percentage = num < 1 && num > -1 ? num * 100 : num;
+      return percentage.toFixed(2).replace('.', ',') + '%';
     default:
       return stringifyValue(value);
   }

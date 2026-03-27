@@ -1,6 +1,7 @@
 // Variables globales
 let excelData = null;
 let excelHeaders = [];
+let columnFormats = {};
 let wordPlaceholders = [];
 let templateId = null;
 let mappings = {};
@@ -28,6 +29,10 @@ function formatNumberClient(value, formatType) {
             return '$ ' + fmtThousands(num);
         case 'thousands':
             return fmtThousands(num);
+        case 'percentage':
+            // Multiplicar por 100 si el valor es decimal (ej: 0.25 -> 25%)
+            const percentage = num < 1 && num > -1 ? num * 100 : num;
+            return percentage.toFixed(2).replace('.', ',') + '%';
         default:
             return String(value);
     }
@@ -200,6 +205,7 @@ async function uploadExcel(file) {
         if (result.success) {
             excelData = result.data;
             excelHeaders = result.headers;
+            columnFormats = result.columnFormats || {};
 
             // Validar que haya datos
             if (!excelHeaders || excelHeaders.length === 0) {
@@ -365,6 +371,7 @@ function createMappingUI() {
             <option value="raw">Sin formato (tal cual)</option>
             <option value="currency">Moneda ($ X.XXX)</option>
             <option value="thousands">Con separador (X.XXX)</option>
+            <option value="percentage">Porcentaje (%)</option>
         `;
 
         selectFormat.addEventListener('change', (e) => {
@@ -378,9 +385,24 @@ function createMappingUI() {
 
             // Mostrar/ocultar selector de formato según si la columna es numérica
             if (e.target.value && excelData && excelData.length > 0) {
-                const isNumeric = excelData.slice(0, 5).some(r => typeof r[e.target.value] === 'number');
-                if (isNumeric) {
+                const colName = e.target.value;
+                // Detectar si es numérica: por formato de Excel O por tipo de dato en las primeras filas
+                const hasExcelFormat = !!columnFormats[colName];
+                const isNumeric = excelData.slice(0, 5).some(r => {
+                    const val = r[colName];
+                    if (typeof val === 'number') return true;
+                    // También detectar strings que son números (ej: fórmulas convertidas)
+                    if (typeof val === 'string' && val.trim() !== '' && !isNaN(Number(val))) return true;
+                    return false;
+                });
+
+                if (isNumeric || hasExcelFormat) {
                     col3.style.display = '';
+                    // Pre-seleccionar formato si viene del Excel
+                    if (hasExcelFormat && (!formatOptions[placeholder] || formatOptions[placeholder] === 'raw')) {
+                        selectFormat.value = columnFormats[colName];
+                        formatOptions[placeholder] = columnFormats[colName];
+                    }
                 } else {
                     col3.style.display = 'none';
                     formatOptions[placeholder] = 'raw';
@@ -593,6 +615,7 @@ async function generateAllDocuments() {
 function resetForm() {
     excelData = null;
     excelHeaders = [];
+    columnFormats = {};
     wordPlaceholders = [];
     templateId = null;
     mappings = {};

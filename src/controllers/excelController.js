@@ -19,8 +19,8 @@ function formatValue(value) {
   if (typeof value === 'object') {
     // Si tiene propiedad 'text', úsala
     if (value.text) return String(value.text);
-    // Si tiene propiedad 'result', úsala
-    if (value.result !== undefined) return String(value.result);
+    // Si tiene propiedad 'result', procesarla recursivamente para preservar tipo numérico
+    if (value.result !== undefined) return formatValue(value.result);
     return String(value);
   }
   
@@ -28,6 +28,29 @@ function formatValue(value) {
   if (typeof value === 'number') return value;
   
   return String(value);
+}
+
+// Detectar tipo de formato desde el numFmt de Excel
+function detectFormatType(numFmt) {
+  if (!numFmt || numFmt === 'General') return null;
+  const fmt = String(numFmt);
+  // Porcentaje: contiene %
+  if (/%/.test(fmt)) {
+    return 'percentage';
+  }
+  // Moneda: símbolos $, €, £, ¥ o formatos contables con _-$
+  if (/[$€£¥]/.test(fmt) || /_-.*\$/.test(fmt) || /"COP"|"USD"|"EUR"/.test(fmt)) {
+    return 'currency';
+  }
+  // Formato contable (empieza con _- y tiene #)
+  if (/^_/.test(fmt) && /#/.test(fmt)) {
+    return 'currency';
+  }
+  // Separador de miles sin símbolo de moneda: #,##0
+  if (/#,##0/.test(fmt)) {
+    return 'thousands';
+  }
+  return null;
 }
 
 export const excelController = {
@@ -45,23 +68,43 @@ export const excelController = {
         return res.status(400).json({ error: 'No se encontró hoja de cálculo' });
       }
 
-      // Obtener headers (primera fila)
-      const headers = [];
+      // Obtener headers CON su número de columna real (eachCell salta celdas vacías)
+      const headerMap = [];
       worksheet.getRow(1).eachCell((cell, colNumber) => {
         if (cell.value) {
-          headers.push(cell.value.toString());
+          headerMap.push({ name: cell.value.toString(), colNumber });
         }
       });
 
-      // Obtener datos
+      const headers = headerMap.map(h => h.name);
+
+      // Detectar formatos de columna desde las primeras filas de datos
+      const columnFormats = {};
+      const maxScanRows = Math.min(worksheet.rowCount, 6); // escanear hasta 5 filas de datos
+      for (let rowNum = 2; rowNum <= maxScanRows; rowNum++) {
+        const row = worksheet.getRow(rowNum);
+        headerMap.forEach(({ name, colNumber }) => {
+          if (columnFormats[name]) return; // ya detectado
+          const cell = row.getCell(colNumber);
+          if (cell.value !== null && cell.value !== undefined && cell.value !== '') {
+            const numFmt = cell.numFmt || (cell.style && cell.style.numFmt);
+            const detectedFormat = detectFormatType(numFmt);
+            if (detectedFormat) {
+              columnFormats[name] = detectedFormat;
+            }
+          }
+        });
+      }
+
+      // Obtener datos usando los números de columna reales
       const data = [];
       worksheet.eachRow((row, rowNumber) => {
         if (rowNumber === 1) return; // Skip header
         
         const rowData = {};
-        headers.forEach((header, index) => {
-          const cellValue = row.getCell(index + 1).value;
-          rowData[header] = formatValue(cellValue);
+        headerMap.forEach(({ name, colNumber }) => {
+          const cellValue = row.getCell(colNumber).value;
+          rowData[name] = formatValue(cellValue);
         });
         
         if (Object.values(rowData).some(val => val !== '')) {
@@ -73,6 +116,7 @@ export const excelController = {
         success: true,
         headers,
         data,
+        columnFormats,
         totalRows: data.length,
         filename: req.file.originalname
       });
