@@ -126,6 +126,16 @@ export const mappingController = {
       const templateBuffer = fs.readFileSync(templatePath);
       const generationStart = Date.now();
 
+      // Pre-compilar expresiones regulares para el fallback (optimización CPU)
+      const placeholderRegexes = {};
+      for (const placeholder of Object.keys(mappings)) {
+        placeholderRegexes[placeholder] = [
+          new RegExp(`\\{\\s*${placeholder.trim()}\\s*\\}`, 'gi'),
+          new RegExp(`\\{\\s*${placeholder.trim().replace(/\\s+/g, '\\\\s+')}\\s*\\}`, 'gi'),
+          new RegExp(`\\{${placeholder.trim()}\\}`, 'gi')
+        ];
+      }
+
       // Generar un documento por cada fila de datos
       for (let i = 0; i < excelData.length; i++) {
         const rowStart = Date.now();
@@ -161,7 +171,7 @@ export const mappingController = {
             filename = buildFilename(row, filenameColumn, i + 1, month, initialName);
             filepath = path.join(downloadsDir, filename);
             
-            fs.writeFileSync(filepath, buffer);
+            await fs.promises.writeFile(filepath, buffer);
             generatedFiles.push({ filename, index: i + 1 });
             successCount++;
             console.log(`✓ Doc ${i + 1}/${excelData.length} generado en ${Date.now() - rowStart}ms`);
@@ -180,15 +190,7 @@ export const mappingController = {
                 const stringValue = String(value).trim();
                 let foundMatch = false;
                 
-                // Crear regex flexible que permite espacios y saltos de línea
-                const patterns = [
-                  // Exactos
-                  new RegExp(`\\{\\s*${placeholder.trim()}\\s*\\}`, 'gi'),
-                  // Con espacios variables
-                  new RegExp(`\\{\\s*${placeholder.trim().replace(/\s+/g, '\\s+')}\\s*\\}`, 'gi'),
-                  // Compatibilidad: sin espacios
-                  new RegExp(`\\{${placeholder.trim()}\\}`, 'gi')
-                ];
+                const patterns = placeholderRegexes[placeholder] || [];
                 
                 for (const regex of patterns) {
                   const before = xmlContent;
@@ -221,7 +223,7 @@ export const mappingController = {
               filename = buildFilename(row, filenameColumn, i + 1, month, initialName);
               filepath = path.join(downloadsDir, filename);
               
-              fs.writeFileSync(filepath, buffer);
+              await fs.promises.writeFile(filepath, buffer);
               generatedFiles.push({ filename, index: i + 1, usedFallback: true });
               successCount++;
               console.log(`✓ Documento ${i + 1} generado con método alternativo`);
@@ -299,7 +301,7 @@ export const mappingController = {
       const zipPath = path.join(downloadsDir, zipFilename);
 
       const output = fs.createWriteStream(zipPath);
-      const archive = archiver('zip', { zlib: { level: 9 } });
+      const archive = archiver('zip', { zlib: { level: 1 } });
 
       output.on('close', () => {
         console.log(`✓ ZIP creado: ${zipFilename} (${archive.pointer()} bytes)`);
@@ -354,31 +356,30 @@ export const mappingController = {
       const secret = process.env.CONVERT_API_SECRET || 'YOUR_SECRET_HERE';
       const convertapi = ConvertApi(secret);
       
-      console.log(`Iniciando conversión a PDF para ${validDocx.length} archivos:`, validDocx);
+      console.log(`Iniciando conversión a PDF para ${validDocx.length} archivos en paralelo:`, validDocx);
       
-      // Convertir cada archivo DOCX a PDF usando ConvertAPI
-      for (const docx of validDocx) {
+      if (secret === 'YOUR_SECRET_HERE' || !secret) {
+        return res.status(500).json({ error: 'API Secret de ConvertAPI no configurado.' });
+      }
+
+      // Convertir archivos DOCX a PDF en paralelo usando Promise.all
+      const conversionPromises = validDocx.map(async (docx) => {
         const inputPath = path.join(downloadsDir, docx);
         const pdfFilename = docx.replace('.docx', '.pdf');
         const outputPath = path.join(downloadsDir, pdfFilename);
 
         try {
           console.log(`Enviando a ConvertAPI: ${docx}...`);
-          
-          if (secret === 'YOUR_SECRET_HERE' || !secret) {
-             throw new Error('API Secret de ConvertAPI no configurado.');
-          }
 
           const result = await convertapi.convert('pdf', { File: inputPath }, 'docx');
-          console.log(`✓ Recibido de ConvertAPI: ${docx}. Guardando en ${downloadsDir}`);
+          console.log(`✓ Recibido de ConvertAPI: ${docx}. Guardando...`);
           
           // Guardar archivos
           const files = await result.saveFiles(downloadsDir);
-          console.log(`Archivos guardados para ${docx}:`, files);
           
           if (fs.existsSync(outputPath)) {
-            pdfFiles.push(pdfFilename);
             console.log(`✓ Validado: ${pdfFilename} existe.`);
+            return pdfFilename;
           } else {
             console.warn(`⚠ Advertencia: El archivo ${outputPath} no existe después de saveFiles.`);
             // Intentar buscar si se guardó con otro nombre
@@ -387,14 +388,23 @@ export const mappingController = {
                const actualName = path.basename(savedFile);
                if (actualName !== pdfFilename) {
                  console.log(`Cambiando nombre de ${actualName} a ${pdfFilename}`);
-                 fs.renameSync(savedFile, outputPath);
-                 pdfFiles.push(pdfFilename);
+                 await fs.promises.rename(savedFile, outputPath);
+                 return pdfFilename;
                }
             }
+            return null;
           }
         } catch (convErr) {
           console.error(`✘ Error convirtiendo ${docx}:`, convErr.message);
+          return null;
         }
+      });
+
+      const conversionResults = await Promise.all(conversionPromises);
+      
+      // Filtrar resultados válidos (no nulos)
+      for (const res of conversionResults) {
+        if (res) pdfFiles.push(res);
       }
 
       if (pdfFiles.length === 0) {
@@ -407,7 +417,7 @@ export const mappingController = {
       const zipPath = path.join(downloadsDir, zipFilename);
 
       const output = fs.createWriteStream(zipPath);
-      const archive = archiver('zip', { zlib: { level: 9 } });
+      const archive = archiver('zip', { zlib: { level: 1 } });
 
       output.on('close', () => {
         console.log(`✓ ZIP PDF (Nube) creado: ${zipFilename}`);
