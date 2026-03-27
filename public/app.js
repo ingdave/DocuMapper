@@ -317,7 +317,7 @@ function createMappingUI() {
 
     wordPlaceholders.forEach(placeholder => {
         const item = document.createElement('div');
-        item.className = 'mapping-item p-1 mb-1';
+        item.className = 'mapping-item p-2 mb-2';
 
         const row = document.createElement('div');
         row.className = 'row g-1 align-items-end';
@@ -340,7 +340,7 @@ function createMappingUI() {
 
         const selectRight = document.createElement('select');
         selectRight.className = 'form-select';
-        selectRight.innerHTML = '<option value="">-- Selecciona columna Excel --</option>';
+        selectRight.innerHTML = '<option value="">Selecciona columna Excel</option>';
 
         excelHeaders.forEach(header => {
             const option = document.createElement('option');

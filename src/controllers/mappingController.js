@@ -202,7 +202,7 @@ export const mappingController = {
               
               // Limpieza final: eliminar cualquier placeholder {VARIABLE} que haya quedado sin mapear
               const beforeCleanup = xmlContent;
-              xmlContent = xmlContent.replace(/\{\s*[a-zA-Z0-9_áéíóúñ\s]+?\s*\}/g, "");
+              xmlContent = xmlContent.replace(/\{\s*[a-zA-Z0-9_áéíóúñÁÉÍÓÚÑ]+\s*\}/g, "");
               if (xmlContent !== beforeCleanup) {
                 console.log("✓ Limpieza final: Se eliminaron placeholders huérfanos del XML");
               }

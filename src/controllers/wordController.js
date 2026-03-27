@@ -30,23 +30,31 @@ export const wordController = {
         const docXml = zip.file('word/document.xml');
         if (docXml) {
           const xmlContent = docXml.asText();
-          // Busca patrones { ... } con espacios variables
-          const regex = /\{\s*([a-zA-Z0-9_áéíóúñ\s]+?)\s*\}/g;
-          const matches = xmlContent.match(regex) || [];
+
+          // Word puede fragmentar el texto en múltiples <w:r> runs dentro del XML.
+          // Para capturar placeholders como {aseguradoranropoliza} correctamente,
+          // eliminamos todas las etiquetas XML y buscamos en el texto plano resultante.
+          const plainText = xmlContent.replace(/<[^>]+>/g, '');
+
+          // Regex: solo letras, números, guiones bajos y letras acentuadas (sin espacios internos)
+          const regex = /\{\s*([a-zA-Z0-9_áéíóúñÁÉÍÓÚÑ]+)\s*\}/g;
+          const matches = plainText.match(regex) || [];
           placeholders = [...new Set(matches.map(m => m.replace(/[{}]/g, '').trim()))].filter(p => p.length > 0);
-          
+
           console.log('✓ Variables extraídas:', placeholders);
         }
       } catch (xmlErr) {
         console.warn('Error extrayendo XML, intentando búsqueda en buffer:', xmlErr.message);
-        
+
         // Fallback: busca en el buffer completo
         try {
           const bufferStr = content.toString('latin1');
-          const regex = /\{([a-zA-Z0-9_áéíóúñ\s]+)\}/g;
-          const matches = bufferStr.match(regex) || [];
+          // Eliminar posibles tags XML residuales del buffer
+          const plainBuffer = bufferStr.replace(/<[^>]+>/g, '');
+          const regex = /\{([a-zA-Z0-9_áéíóúñÁÉÍÓÚÑ]+)\}/g;
+          const matches = plainBuffer.match(regex) || [];
           placeholders = [...new Set(matches.map(m => m.replace(/[{}]/g, '').trim()))].filter(p => p.length > 0);
-          
+
           console.log('✓ Variables extraídas (en buffer):', placeholders);
         } catch (bufErr) {
           console.error('Todos los métodos de extracción fallaron:', bufErr.message);
